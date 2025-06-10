@@ -1,4 +1,7 @@
+import { useNavigate} from "react-router-dom";
 function HeaderComp() {
+  const navigate = useNavigate();
+
   return (
     <>
       <div className="flex items-center justify-between bg-[#1a1a1a] mr-5 ml-5 rounded-xl h-[55px] mt-8 p-2.5 font-montserrat">
@@ -16,12 +19,14 @@ function HeaderComp() {
         </div>
         <div className="flex items-center gap-3">
           <button
+          onClick={() => navigate("/login")}
             className="text-sm text-[#ffffff] font-medium hover:text-blue-400
            bg-[#2d2d2d] rounded-[12px] border border-[#4b5563] h-[30px] w-[65px]"
           >
             SignIn
           </button>
           <button
+          onClick={() => navigate("/signup")}
             className="text-sm text-[#ffffff] font-medium hover:text-blue-400
            bg-[#2d2d2d] rounded-[12px] border border-[#4b5563] h-[30px] w-[65px]"
           >
