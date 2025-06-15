@@ -1,10 +1,38 @@
 import { useState } from "react";
 import { useNavigate , Link} from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
-import {Eye , ArrowLeft} from "lucide-react";
-
+import {Eye, ArrowLeft} from "lucide-react";
+import Navbar from '../components/headerContent/HeaderComp';
+import { loginUser } from "../api/api";
 
 export default function Login(){
+
+  const[email,setEmail] = useState ("");
+  const [password,setpassword] = useState("");
+  const navigate = useNavigate();
+  const [showPassword, setshowPassword] = useState(false);
+ // const [captcha , setCaptcha] = useState(null);
+
+  const handleLogin = async(e: { preventDefault: () => void; }) =>{
+    e.preventDefault();
+
+ //   if(!captcha){
+    //  alert("Please verify reCaptacha");
+   //   return;
+   // }//
+
+    try{
+      const response =await loginUser({email,password});
+      if(response.token){
+      localStorage.setItem("token", response.token);
+      alert("Login successfull!");
+      navigate("/")
+      }
+    }catch(err){
+      alert(err);
+
+    }
+  }
 
   const spinner = (
     <svg
@@ -70,8 +98,8 @@ export default function Login(){
     },
   ];
 
-
-  const navigate = useNavigate();
+  
+  
   const [socialLoginLoading] = useState({
     google: false,
     facebook: false,
@@ -79,22 +107,24 @@ export default function Login(){
   });
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col p-8">
-    <div className="flex items-center justify-center min-h-screen bg-black">
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      <Navbar/>
+
+    <div className="flex-grow flex items-center justify-center min-h-screen bg-black px-4 py-30">
       <div className="w-full max-w-md">
         <div className="border border-zinc-800 rounded-2xl  bg-zinc-900 overflow-hidden shadow-lg ">
-          <div className="h-2 bg-gradient-to-r from-pink-500 to-red-500"></div>
+          <div className="h-2 bg-gradient-to-r from-blue-100 to-cyan-500"></div>
           <div className="p-8">
           <Link to="/"
              className="inline-flex items-center text-center text-sm text-gray-400 hover:text-blue-400 mb-6">
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Back to Homepage
+              Back to homepage
             </Link>
             <h1 className="flex text-2xl font-bold md-6 text-white justify-center">
               Login
             </h1>
 
-            <form className="space-y-5">
+            <form  onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   {" "}
@@ -102,6 +132,8 @@ export default function Login(){
                 </label>
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e)=>setEmail(e.target.value)}
                   className="w-full p-3 bg-zinc-800 border border-zinc-700 placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500  focus:border-transparent"
                   required
                   placeholder="you@example.com"
@@ -124,14 +156,17 @@ export default function Login(){
 
                 <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword? "text": "password"}
+                  value={password}
+                  onChange={(e)=>setpassword(e.target.value)}
                   className="w-full p-3 bg-zinc-800 border border-zinc-700 placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500  focus:border-transparent"
                   required
                   placeholder="••••••••"
                 />
                   <button
                       type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-yellow-400"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-cyan-400"
+                      onClick={()=>setshowPassword(!showPassword)}
                     >
                        <Eye size={18} />
                     </button>
@@ -143,7 +178,7 @@ export default function Login(){
                   type="checkbox"
                   id="remember"
                   required
-                  className="w-4 h-4 accent-blue-400 rounded focus:ring-pink-500"
+                  className="w-4 h-4 accent-blue-400 rounded focus:ring-cyan-500"
                 />
                 <label
                   htmlFor="remember"
@@ -160,7 +195,7 @@ export default function Login(){
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="w-full bg-pink-400 text-black py-3 font-medium rounded-lg hover:bg-pink-300 transition duration-300"
+                  className="w-full bg-blue-300 text-black py-3 font-medium rounded-lg hover:bg-cyan-400 transition duration-300"
                 >
                   Sign In
                 </button>
@@ -184,19 +219,21 @@ export default function Login(){
                     key={name}
                     className="w-full flex items-center justify-center p-3 bg-zinc-800 rounded-lg border border-zinc-700 hover:cursor-pointer  hover:bg-zinc-700 transition-all"
                   >
-                    {socialLoginLoading[name  as keyof typeof socialLoginLoading] ? spinner : icon}
+                    {socialLoginLoading[name as keyof typeof socialLoginLoading] ? spinner : icon}
                   </button>
                 ))}
               </div>
 
                 <div className="mt-8 text-center text-sm text-gray-400">
                 Don't have an account?{" "}
+                <Link to="/signup">
                 <button
                 onClick={() => navigate("/signup")}
                   className="font-medium text-blue-400 hover:underline hover:cursor-pointer"
                 >
                   Sign up
                 </button>
+                </Link>
               </div>
             </div>
           </div>
