@@ -122,13 +122,25 @@ const Footer = () => {
                 <a
                   key={index}
                   href={social.href}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-800/50 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-800 transition-all duration-300 group"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-800/50 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-800 transition-all duration-300 group relative"
                   aria-label={social.label}
                 >
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 rounded-full blur-md" 
+                      style={{
+                        background: social.label === "Facebook" ? "rgba(24, 119, 242, 0.3)" :
+                                  social.label === "Instagram" ? "rgba(228, 64, 95, 0.3)" :
+                                  social.label === "Twitter" ? "rgba(29, 161, 242, 0.3)" :
+                                  social.label === "YouTube" ? "rgba(255, 0, 0, 0.3)" :
+                                  "rgba(88, 101, 242, 0.3)"
+                      }}
+                    />
+                  </div>
                   <img
                     src={social.icon}
                     alt={social.label}
-                    className={`w-5 h-5 text-gray-400 transition-colors ${social.hoverClass}`}
+                    className={`w-5 h-5 text-gray-400 transition-colors relative z-10 ${social.hoverClass}`}
                   />
                 </a>
               ))}
@@ -219,10 +231,9 @@ const Footer = () => {
         </div>
         <div className="flex flex-wrap justify-center gap-8 mb-12">
           {[
-            { src: "/src/assets/svgIcons/visa.svg", alt: "Visa" },
-            { src: "/src/assets/svgIcons/mastercard.svg", alt: "Mastercard" },
-            { src: "/src/assets/svgIcons/amex.svg", alt: "American Express" },
-            { src: "/src/assets/svgIcons/paypal.svg", alt: "PayPal" },
+            { src: "/src/assets/images/visa.png", alt: "Visa" },
+            { src: "/src/assets/images/mastercard.png", alt: "Mastercard" },
+            { src: "/src/assets/images/paypal.png", alt: "PayPal" },
           ].map((payment, index) => (
             <div key={index} className="payment-icon-wrapper">
               <img

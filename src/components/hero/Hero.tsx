@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import BoostingIcon from "../../assets/svgIcons/boostingArrow.svg?react";
 import UserIcon from "../../assets/svgIcons/userIcon.svg?react";
 import CurrencyIcon from "../../assets/svgIcons/currencyIcon.svg?react";
@@ -14,10 +14,18 @@ import valorantImg from "../../assets/images/valorant.png";
 import gtaImg from "../../assets/images/gta.jpg";
 import cocImg from "../../assets/images/coc.jpg";
 import codImg from "../../assets/images/cod.jpg";
+import apexImg  from "../../assets/images/apex.jpg";
+import bgmiImg from "../../assets/images/bgmi.jpeg";
+import forzaImg from "../../assets/images/forzahorizon.jpg";
+import freefireImg from "../../assets/images/freefire.avif";
+import minecraftImg from "../../assets/images/minecraft.jpg";
+import pokemonImg from "../../assets/images/pokemon.jpg";
+import rocketImg from "../../assets/images/rocket.jpg";
 
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
+  const gamesContainerRef = useRef<HTMLDivElement>(null);
 
   // Services
   const serviceCards = [
@@ -72,6 +80,33 @@ const HeroSection = () => {
       name: "Call of Duty",
       image: codImg,
     },
+    {
+      name:"Apex Legends",
+      image: apexImg,
+    },
+    {
+      name:"BGMI",
+      image: bgmiImg,
+    },{
+      name:"Forza Horizon",
+      image: forzaImg,
+    },
+    {
+      name:"Free Fire",
+      image: freefireImg,
+    },
+    {
+      name:"Minecraft",
+      image: minecraftImg,
+    },
+    {
+      name:"Pokemon Go",
+      image: pokemonImg,
+    },
+    {
+      name:"Rocket League",
+      image: rocketImg,
+    },
   ]
   const handleSearch = () => {
   };
@@ -94,6 +129,21 @@ const HeroSection = () => {
 
   // Calculate visible cards 
   const visibleCards = serviceCards.slice(currentSlide, currentSlide + 3);
+
+  const scrollGames = (direction: 'left' | 'right') => {
+    if (gamesContainerRef.current) {
+      const scrollAmount = 400;
+      const container = gamesContainerRef.current;
+      const targetScroll = direction === 'left' 
+        ? container.scrollLeft - scrollAmount 
+        : container.scrollLeft + scrollAmount;
+      
+      container.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 relative overflow-hidden">
@@ -199,17 +249,47 @@ const HeroSection = () => {
           </div>
 
           {/* Popular Games  */}
-          <div className="mt-20">
-            <h2 className="text-4xl font-bold text-gray-400 mb-8">POPULAR GAMES</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 max-w-6xl mx-auto">
-              {popularGames.map((game, index) => (
-                <PopularGameCard
-                  key={index}
-                  name={game.name}
-                  image={game.image}
-                  onClick={() => handleGameClick(game.name)}
-                />
-              ))}
+          <div className="mt-20 relative">
+            <h2 className="text-4xl font-bold text-white mb-12 text-center">Popular Games</h2>
+            
+            {/* Scroll Buttons */}
+            <button
+              onClick={() => scrollGames('left')}
+              className="absolute -left-4 top-[60%] -translate-y-1/2 z-20 bg-gray-900/80 hover:bg-gray-900 text-white rounded-full p-3 transition-all duration-300 hover:cursor-pointer" 
+              aria-label="Scroll games left"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => scrollGames('right')}
+              className="absolute -right-4 top-[60%] -translate-y-1/2 z-20 bg-gray-900/80 hover:bg-gray-900 text-white rounded-full p-3 transition-all duration-300 hover:cursor-pointer"
+              aria-label="Scroll games right"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </button>
+
+            {/* Games Container */}
+            <div className="relative mx-8">
+              <div 
+                ref={gamesContainerRef}
+                className="flex overflow-x-auto gap-4 py-4 px-2 scrollbar-hide scroll-smooth"
+                style={{ 
+                  msOverflowStyle: 'none',
+                  scrollbarWidth: 'none',
+                  WebkitOverflowScrolling: 'touch'
+                }}
+              >
+                {popularGames.map((game, index) => (
+                  <div className="transform-gpu" style={{ padding: '10px' }}>
+                    <PopularGameCard
+                      key={index}
+                      image={game.image}
+                      onClick={() => handleGameClick(game.name)}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
