@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import LogoIcon from "../../assets/svgIcons/LogoIcon.svg?react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import LanguageSelector from "./LanguageSelector";
+import { logout, isAuthenticated } from "../../utils/auth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,12 +13,9 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    console.log("Token in Navbar:", token);
-    setisloggedIn(!!token);
+    // Check authentication status on component mount
+    setisloggedIn(isAuthenticated());
   }, []);
-
- 
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,9 +25,13 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    // Clear token from localStorage
+    logout();
+    // Clear any client-side state
     setisloggedIn(false);
+    toast.success("Logged out successfully!");
     navigate("/");
   };
 
@@ -168,39 +170,40 @@ const Navbar = () => {
 
               {/* Mobile Menu Button */}
               <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-white hover:text-cyan-400 transition-colors"
-            >
-              {isMenuOpen ? (
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
-            </button>
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="md:hidden text-white hover:text-cyan-400 transition-colors"
+              >
+                {isMenuOpen ? (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -223,9 +226,8 @@ const Navbar = () => {
           </div>
         )}
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
 };
 
 export default Navbar;

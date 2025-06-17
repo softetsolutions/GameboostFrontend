@@ -1,25 +1,52 @@
-const BASE_URL = "http://localhost:5000";
+import { API_BASE_URL } from "./config";
 
-export const signupUser = async(userData : any) =>{
-    const res = await fetch(`${BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: {"Content-Type" : "application/json"},
-        body : JSON.stringify(userData),
-    });
-
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.message || "Signip failed");
-    return data;
+export interface UserData {
+  email: string;
+  password: string;
+  name?: string;
 }
 
-export const loginUser = async(credentials : any)=>{
-    const res = await fetch(`${BASE_URL}/api/auth/login`,{
-        method : "POST",
-        headers: {"Content-Type" : "application/json"},
-        body : JSON.stringify(credentials),  
-    });
-
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.message || "Login failed");
-    return data;
+export interface LoginCredentials {
+  email: string;
+  password: string;
 }
+
+export interface AuthResponse {
+  token: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  message?: string;
+}
+
+export const signupUser = async (userData: UserData): Promise<AuthResponse> => {
+  const res = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userData),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Signup failed");
+  return data;
+};
+
+export const loginUser = async (
+  credentials: LoginCredentials
+): Promise<AuthResponse> => {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Login failed");
+  if (data.token) {
+    localStorage.setItem("userToken", data.token);
+  }
+
+  return data;
+};
