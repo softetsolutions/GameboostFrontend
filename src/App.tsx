@@ -13,13 +13,14 @@ import CreateProduct from "./components/admin/CreateProduct/CreateProduct";
 import CreateService from "./components/admin/CreateService";
 import CreateOffer from "./components/CreateOffer";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ProfilePage from "./components/profilePage/ProfilePage";
-import BuyCardComp from "./components/orderContent/BuyCardComp";
+// import ProfilePage from "./components/profilePage/ProfilePage"; TO BE INTEGRATED
+// import BuyCardComp from "./components/orderContent/BuyCardComp"; // TO BE INTEGRATED
+import Homepage from "./homepage/Homepage";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<BuyCardComp />} />
+      <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/setting" element={<Setting />} />
