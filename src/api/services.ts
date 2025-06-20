@@ -30,7 +30,7 @@ export const fetchServices = async (): Promise<Service[]> => {
   return Array.isArray(data) ? data : [];
 };
 
-export const createService = async (serviceName: string): Promise<Service> => {
+export const createService = async (service: CreateServiceRequest): Promise<Service> => {
   try {
     const { token } = getAuthInfo();
 
@@ -41,11 +41,7 @@ export const createService = async (serviceName: string): Promise<Service> => {
         Authorization: `Bearer ${token}`,
       },
       credentials: "include",
-      body: JSON.stringify({
-        name: serviceName,
-        type: "default",
-        icon: "",
-      } as CreateServiceRequest),
+      body: JSON.stringify(service),
     });
 
     if (!response.ok) {

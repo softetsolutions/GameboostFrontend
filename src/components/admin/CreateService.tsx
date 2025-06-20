@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { API_BASE_URL } from "../../api/config";
+import { createService } from "../../api/services";
 import ImageIcon from "../../assets/svgIcons/ImageIcon.svg?react";
 import SpinnerIcon from "../../assets/svgIcons/SpinnerIcon.svg?react";
 
@@ -69,30 +69,13 @@ function CreateService() {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/services/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          ...formData,
-          type: formData.name,
-        }),
+       await createService({
+        name: formData.name,
+        type: formData.type,
+        icon: formData.icon,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create service");
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Service created successfully!");
-        navigate("/admin");
-      } else {
-        throw new Error(data.message || "Failed to create service");
-      }
+      toast.success("Service created successfully!");
+      navigate("/admin");
     } catch (error) {
       console.error("Error creating service:", error);
       const errorMessage =
