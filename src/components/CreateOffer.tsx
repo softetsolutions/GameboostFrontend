@@ -1,79 +1,78 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomDropdown from "./ui/CustomDropdown";
+import { fetchServices } from "../api/services";
+import type { Service } from "../api/services";
+import {
+  fetchProductsByService,
+  fetchProductById,
+} from "../api/products";
+import type { Product } from "../api/products";
+import { createOffer } from "../api/offers";
+import { jwtDecode } from "jwt-decode";
+import { getAuthInfo } from "../utils/auth";
 
-interface Service {
-  _id: string;
-  name: string;
-}
-
-interface Brand {
-  _id: string;
-  name: string;
-}
+interface Brand extends Product {}
 
 interface DynamicField {
   fieldName: string;
-  fieldType: "custom" | "text" | "range" | "number_dropdown";
+  fieldType: "custom" | "text" | "range"| string;
   options?: string[];
-  required: boolean;
+  isrequired: boolean;
   minValue?: number;
   maxValue?: number;
 }
 
 interface OfferFormData {
-  service: string;
   brand: string;
-  price: string;
   dynamicFields: Record<string, string>;
+  price: string;
+  currency: string;
+  quantityAvailable: string;
+  deliveryTime: string;
+  instantDelivery: boolean;
 }
-
-// Mock data - replace with actual API calls later
-const MOCK_SERVICES: Service[] = [
-  { _id: "1", name: "Game Accounts" },
-  { _id: "2", name: "Game Items" },
-  { _id: "3", name: "Game Currency" },
-];
-
-const MOCK_BRANDS: Brand[] = [
-  { _id: "1", name: "PUBG Mobile" },
-  { _id: "2", name: "Free Fire" },
-  { _id: "3", name: "Call of Duty Mobile" },
-];
-
-// Mock dynamic fields - replace with actual fields from admin configuration
-const MOCK_DYNAMIC_FIELDS: DynamicField[] = [
-  {
-    fieldName: "Account Number",
-    fieldType: "number_dropdown",
-    required: true,
-    minValue: 0,
-    maxValue: 50,
-  },
-  {
-    fieldName: "Server",
-    fieldType: "custom",
-    options: ["Asia", "Europe", "North America", "South America"],
-    required: true,
-  },
-  {
-    fieldName: "Special Notes",
-    fieldType: "text",
-    required: false,
-  },
-];
 
 function CreateOffer() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  const [services, setServices] = useState<Service[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [dynamicFields, setDynamicFields] = useState<DynamicField[]>([]);
+
+  const [selectedService, setSelectedService] = useState<string>("");
+
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
+  const [isLoadingBrands, setIsLoadingBrands] = useState(false);
+
   const [formData, setFormData] = useState<OfferFormData>({
-    service: "",
     brand: "",
-    price: "",
     dynamicFields: {},
+    price: "",
+    currency: "INR",
+    quantityAvailable: "1",
+    deliveryTime: "",
+    instantDelivery: false,
   });
+
+  useEffect(() => {
+    const loadServices = async () => {
+      setIsLoadingServices(true);
+      try {
+        const fetchedServices = await fetchServices();
+        setServices(fetchedServices);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load services"
+        );
+      } finally {
+        setIsLoadingServices(false);
+      }
+    };
+    loadServices();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -92,7 +91,7 @@ function CreateOffer() {
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: name === 'instantDelivery' ? (e.target as HTMLInputElement).checked : value,
       }));
     }
   };
@@ -107,18 +106,52 @@ function CreateOffer() {
     }));
   };
 
-  const handleServiceChange = (value: string) => {
+  const handleServiceChange = async (serviceId: string) => {
+    setSelectedService(serviceId);
     setFormData((prev) => ({
       ...prev,
-      service: value,
+      brand: "",
+      dynamicFields: {},
     }));
+    setBrands([]);
+    setDynamicFields([]);
+    if (serviceId) {
+      setIsLoadingBrands(true);
+      try {
+        const fetchedBrands = await fetchProductsByService(serviceId);
+        setBrands(fetchedBrands);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load brands"
+        );
+      } finally {
+        setIsLoadingBrands(false);
+      }
+    }
   };
 
-  const handleBrandChange = (value: string) => {
+  const handleBrandChange = async (brandId: string) => {
     setFormData((prev) => ({
       ...prev,
-      brand: value,
+      brand: brandId,
+      dynamicFields: {},
     }));
+    setDynamicFields([]);
+    if (brandId) {
+      try {
+        const productDetails = await fetchProductById(brandId);
+        if (productDetails.productRequiredFields) {
+          // TODO: Fix this type casting
+          setDynamicFields(
+            productDetails.productRequiredFields as DynamicField[]
+          );
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load product fields"
+        );
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,21 +159,28 @@ function CreateOffer() {
     setIsSubmitting(true);
     setError("");
 
+    // Check role from token
+    const { token } = getAuthInfo();
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      console.log('User role from token:', decoded.role);
+      if (decoded.role !== "seller") {
+        setError("Only sellers can create offers.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     try {
       // Validate required fields
-      const requiredFields = MOCK_DYNAMIC_FIELDS.filter(
-        (field) => field.required
-      );
+      const requiredFields = dynamicFields.filter((field) => field.isrequired);
       for (const field of requiredFields) {
         if (!formData.dynamicFields[field.fieldName]) {
           throw new Error(`${field.fieldName} is required`);
         }
       }
 
-      // TODO: API integration
-      console.log("Form submitted:", formData);
-
-      // Mock success
+      await createOffer(formData);
       navigate("/admin/offers");
     } catch (error) {
       setError(
@@ -160,10 +200,26 @@ function CreateOffer() {
 
     switch (field.fieldType) {
       case "number_dropdown":
-        const numbers = generateNumberRange(
-          field.minValue || 0,
-          field.maxValue || 0
-        );
+      case "range": {
+        let min = 0;
+        let max = 100;
+
+        if (field.fieldType === "range" && field.options && field.options.length > 0) {
+          const rangeParts = field.options[0].split("-");
+          if (rangeParts.length === 2) {
+            const parsedMin = parseInt(rangeParts[0], 10);
+            const parsedMax = parseInt(rangeParts[1], 10);
+            if (!isNaN(parsedMin) && !isNaN(parsedMax)) {
+              min = parsedMin;
+              max = parsedMax;
+            }
+          }
+        } else {
+          min = field.minValue || 0;
+          max = field.maxValue || 100;
+        }
+
+        const numbers = generateNumberRange(min, max);
         return (
           <CustomDropdown
             value={fieldValue}
@@ -172,9 +228,10 @@ function CreateOffer() {
             }
             options={numbers.map((num) => num.toString())}
             placeholder={`Select ${field.fieldName}`}
-            required={field.required}
+            required={field.isrequired}
           />
         );
+      }
 
       case "custom":
         return (
@@ -185,7 +242,7 @@ function CreateOffer() {
             }
             options={field.options || []}
             placeholder={`Select ${field.fieldName}`}
-            required={field.required}
+            required={field.isrequired}
           />
         );
 
@@ -195,12 +252,15 @@ function CreateOffer() {
             name={`dynamic_${field.fieldName}`}
             value={fieldValue}
             onChange={handleInputChange}
-            required={field.required}
+            required={field.isrequired}
             rows={3}
             className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2 px-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200"
             placeholder={`Enter ${field.fieldName.toLowerCase()}`}
           />
         );
+
+      default:
+        return null;
     }
   };
 
@@ -217,7 +277,7 @@ function CreateOffer() {
       </div>
 
       {/* Form Container */}
-      <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden shadow-lg">
+      <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-xl shadow-lg py-16 pb-32">
         <div className="px-5 py-4 border-b border-gray-700/50">
           <h3 className="text-base font-medium text-white">Offer Details</h3>
         </div>
@@ -241,16 +301,18 @@ function CreateOffer() {
               </label>
               <CustomDropdown
                 value={
-                  MOCK_SERVICES.find((s) => s._id === formData.service)?.name ||
-                  ""
+                  services.find((s) => s._id === selectedService)?.name || ""
                 }
                 onChange={(value) => {
-                  const service = MOCK_SERVICES.find((s) => s.name === value);
+                  const service = services.find((s) => s.name === value);
                   if (service) handleServiceChange(service._id);
                 }}
-                options={MOCK_SERVICES.map((service) => service.name)}
-                placeholder="Select a service"
+                options={services.map((service) => service.name)}
+                placeholder={
+                  isLoadingServices ? "Loading..." : "Select a service"
+                }
                 required={true}
+                disabled={isLoadingServices}
               />
             </div>
 
@@ -263,16 +325,21 @@ function CreateOffer() {
                 Brand
               </label>
               <CustomDropdown
-                value={
-                  MOCK_BRANDS.find((b) => b._id === formData.brand)?.name || ""
-                }
+                value={brands.find((b) => b._id === formData.brand)?.title || ""}
                 onChange={(value) => {
-                  const brand = MOCK_BRANDS.find((b) => b.name === value);
+                  const brand = brands.find((b) => b.title === value);
                   if (brand) handleBrandChange(brand._id);
                 }}
-                options={MOCK_BRANDS.map((brand) => brand.name)}
-                placeholder="Select a brand"
+                options={brands.map((brand) => brand.title)}
+                placeholder={
+                  isLoadingBrands
+                    ? "Loading..."
+                    : selectedService
+                    ? "Select a brand"
+                    : "Select a service first"
+                }
                 required={true}
+                disabled={isLoadingBrands || !selectedService}
               />
             </div>
 
@@ -282,7 +349,7 @@ function CreateOffer() {
                 htmlFor="price"
                 className="block text-sm font-medium text-gray-300 mb-1"
               >
-                Price (INR)
+                Price
               </label>
               <input
                 type="number"
@@ -291,22 +358,98 @@ function CreateOffer() {
                 value={formData.price}
                 onChange={handleInputChange}
                 required
-                min="0"
-                step="0.01"
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2 px-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200"
                 placeholder="Enter price"
               />
+            </div>
+
+            {/* Currency */}
+            <div>
+              <label
+                htmlFor="currency"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
+                Currency
+              </label>
+              <input
+                type="text"
+                id="currency"
+                name="currency"
+                value={formData.currency}
+                onChange={handleInputChange}
+                className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2 px-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200"
+                placeholder="e.g., INR"
+              />
+            </div>
+
+            {/* Quantity Available */}
+            <div>
+              <label
+                htmlFor="quantityAvailable"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
+                Quantity Available
+              </label>
+              <input
+                type="number"
+                id="quantityAvailable"
+                name="quantityAvailable"
+                value={formData.quantityAvailable}
+                onChange={handleInputChange}
+                required
+                min="1"
+                className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2 px-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200"
+                placeholder="Enter quantity"
+              />
+            </div>
+
+            {/* Delivery Time */}
+            <div>
+              <label
+                htmlFor="deliveryTime"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
+                Delivery Time
+              </label>
+              <input
+                type="text"
+                id="deliveryTime"
+                name="deliveryTime"
+                value={formData.deliveryTime}
+                onChange={handleInputChange}
+                required
+                className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2 px-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200"
+                placeholder="e.g., 24 hours"
+              />
+            </div>
+
+            {/* Instant Delivery */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="instantDelivery"
+                name="instantDelivery"
+                checked={formData.instantDelivery}
+                onChange={handleInputChange}
+                className="h-4 w-4 rounded border-gray-600 bg-gray-700/50 text-cyan-600 focus:ring-cyan-500"
+              />
+              <label
+                htmlFor="instantDelivery"
+                className="ml-2 block text-sm text-gray-300"
+              >
+                Instant Delivery
+              </label>
             </div>
           </div>
 
           {/* Dynamic Fields */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-white">Product Details</h4>
-            {MOCK_DYNAMIC_FIELDS.map((field) => (
+            {dynamicFields.map((field) => (
               <div key={field.fieldName}>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   {field.fieldName}
-                  {field.required && (
+                  {field.isrequired && (
                     <span className="text-red-500 ml-1">*</span>
                   )}
                 </label>
@@ -316,7 +459,7 @@ function CreateOffer() {
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-4 mt-8">
             <button
               type="button"
               onClick={() => navigate(-1)}

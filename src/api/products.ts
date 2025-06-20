@@ -11,7 +11,7 @@ export interface ProductFormData {
     fieldName: string;
     fieldType: string;
     options: string[];
-    required: boolean;
+    isrequired: boolean;
   }>;
   additionalFields?: any[];
   images?: string[];
@@ -28,7 +28,7 @@ export interface Product {
     fieldName: string;
     fieldType: string;
     options: string[];
-    required: boolean;
+    isrequired: boolean;
   }>;
   additionalFields?: any[];
   images?: string[];
@@ -65,4 +65,52 @@ export const createProduct = async (
 
   const data = await response.json();
   return data;
+};
+
+export const fetchProductsByService = async (
+  serviceId: string
+): Promise<Product[]> => {
+  const response = await fetch(`${API_BASE_URL}/products?service=${serviceId}`, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch products for the service");
+  }
+
+  const res = await response.json();
+  if (res.success && Array.isArray(res.data)) {
+    return res.data;
+  }
+  return [];
+};
+
+export const fetchProductById = async (productId: string): Promise<Product> => {
+  const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(
+      "Failed to fetch product details:",
+      response.status,
+      errorText
+    );
+    throw new Error(`Failed to fetch product details: ${response.status}`);
+  }
+
+  try {
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to parse product details ", error);
+    throw new Error("Failed to parse product details");
+  }
 };

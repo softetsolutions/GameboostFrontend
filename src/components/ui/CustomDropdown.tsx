@@ -6,6 +6,7 @@ interface CustomDropdownProps {
   options: string[];
   placeholder: string;
   required: boolean;
+  disabled?: boolean;
 }
 
 function CustomDropdown({
@@ -14,6 +15,7 @@ function CustomDropdown({
   options,
   placeholder,
   required,
+  disabled = false,
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,10 +38,15 @@ function CustomDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2.5 px-3 text-sm text-left text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200 flex justify-between items-center"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className="w-full bg-gray-700/50 border border-gray-600 rounded-lg py-2.5 px-3 text-sm text-left text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent hover:border-gray-500 transition-all duration-200 flex justify-between items-center disabled:bg-gray-800/50 disabled:cursor-not-allowed"
+        disabled={disabled}
       >
-        <span className={value ? "text-white" : "text-gray-400"}>
+        <span
+          className={`${
+            value ? "text-white" : "text-gray-400"
+          } ${disabled ? 'text-gray-500' : ''}`}
+        >
           {value || placeholder}
         </span>
         <svg
