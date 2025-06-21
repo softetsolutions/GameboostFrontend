@@ -26,13 +26,16 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    // Clear token from localStorage
-    logout();
-    // Clear any client-side state
-    setisloggedIn(false);
-    toast.success("Logged out successfully!");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setisloggedIn(false);
+      toast.success("Logged out successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
+    }
   };
 
   const menuItems = [

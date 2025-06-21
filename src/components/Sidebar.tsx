@@ -61,10 +61,15 @@ export default function Sidebar() {
     }
   }, [navigate]);
 
-  const handleLogOut = () => {
-    logout();
-    toast.success("Logged out successfully!");
-    navigate("/");
+  const handleLogOut = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
+    }
   };
 
   // Get the base path based on user role

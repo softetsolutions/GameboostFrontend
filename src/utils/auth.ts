@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+import { logoutUser } from "../api/api";
 
 interface AuthTokenPayload {
   id: string;
@@ -23,8 +24,14 @@ export const getAuthInfo = () => {
   return { token, userId, role };
 };
 
-export const logout = () => {
-  localStorage.removeItem("userToken");
+export const logout = async () => {
+  try {
+    await logoutUser();
+  } catch (error) {
+    console.error("Logout API call failed:", error);
+  } finally {
+    localStorage.removeItem("userToken");
+  }
 };
 
 export const isAuthenticated = (): boolean => {
