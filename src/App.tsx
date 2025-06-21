@@ -7,8 +7,18 @@ import Account from "./components/Settings/Account";
 import Privacy from "./components/Settings/Privacy";
 import Verification from "./components/Settings/Verification";
 import LanguageSelector from "./components/headerContent/LanguageSelector";
+import Order from "./components/Orders/Order";
+import Chat from "./components/Chat/Chat";
+import Adminchat from "./components/Chat/Adminchat";
+import Group from "./components/Chat/Group";
+import DM from "./components/Chat/DM";
+
 
  function App() {
+
+
+
+
    return (
   
     <Routes>
@@ -22,7 +32,15 @@ import LanguageSelector from "./components/headerContent/LanguageSelector";
       <Route path="/language" element={<LanguageSelector onClose={function (): void {
         throw new Error("Function not implemented.");
       } }/>}/>
+      <Route path="/orders" element={<Order/>}/>
+      <Route  path="/adminchat" element={<Adminchat />}/>
+      <Route path="/chat" element={<Chat/>}/>
+      
+      <Route path="/groupchat" element={<Group />}/>
+      <Route path="/DMs" element={<DM/>}/>
+
     </Routes>
+    
    );
  }
 

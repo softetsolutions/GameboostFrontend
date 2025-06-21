@@ -4,6 +4,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import {Eye, ArrowLeft} from "lucide-react";
 import Navbar from '../components/headerContent/HeaderComp';
 import { loginUser } from "../api/api";
+import Footer from "./footer";
 
 export default function Login(){
 
@@ -107,12 +108,12 @@ export default function Login(){
   });
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex flex-col">
       <Navbar/>
 
-    <div className="flex-grow flex items-center justify-center min-h-screen bg-black px-4 py-30">
+    <div className="flex-grow flex items-center justify-center min-h-screen  bg-gradient-to-b from-gray-800/20 to-gray-800/70 px-4 py-30">
       <div className="w-full max-w-md">
-        <div className="border border-zinc-800 rounded-2xl  bg-zinc-900 overflow-hidden shadow-lg ">
+        <div className="border border-gray-800/90 rounded-2xl  hover:border-cyan-600/30 shadow-2xl hover:shadow-gray-800/70 bg-gradient-to-b from-gray-800/70 to-gray-800/80 overflow-hidden  ">
           <div className="h-2 bg-gradient-to-r from-blue-100 to-cyan-500"></div>
           <div className="p-8">
           <Link to="/"
@@ -120,7 +121,7 @@ export default function Login(){
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to homepage
             </Link>
-            <h1 className="flex text-2xl font-bold md-6 text-white justify-center">
+            <h1 className="flex text-2xl font-bold md-6 text-white justify-center py-3">
               Login
             </h1>
 
@@ -134,7 +135,7 @@ export default function Login(){
                   type="email"
                   value={email}
                   onChange={(e)=>setEmail(e.target.value)}
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500  focus:border-transparent"
+                  className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   required
                   placeholder="you@example.com"
                 />
@@ -159,7 +160,7 @@ export default function Login(){
                   type={showPassword? "text": "password"}
                   value={password}
                   onChange={(e)=>setpassword(e.target.value)}
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500  focus:border-transparent"
+                   className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   required
                   placeholder="••••••••"
                 />
@@ -195,7 +196,7 @@ export default function Login(){
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="w-full bg-blue-300 text-black py-3 font-medium rounded-lg hover:bg-cyan-400 transition duration-300"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-800 shadow-md hover:shadow-cyan-500/30 hover:cursor-pointer text-white py-3 font-medium rounded-lg transition duration-300"
                 >
                   Sign In
                 </button>
@@ -204,10 +205,10 @@ export default function Login(){
             <div className="mt-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-zinc-700"></div>
+                  <div className="w-full border-t border-gray-700"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-zinc-900 text-gray-400">
+                  <span className="px-2  bg-gray-800/80  text-gray-400">
                     Or continue with
                   </span>
                 </div>
@@ -217,7 +218,7 @@ export default function Login(){
                 {socialProviders.map(({ name, icon }) => (
                   <button
                     key={name}
-                    className="w-full flex items-center justify-center p-3 bg-zinc-800 rounded-lg border border-zinc-700 hover:cursor-pointer  hover:bg-zinc-700 transition-all"
+                    className="w-full flex items-center justify-center p-3  bg-gray-600/40 border border-gray-700 rounded-lg hover:cursor-pointer  hover:bg-gray-700 transition-all"
                   >
                     {socialLoginLoading[name as keyof typeof socialLoginLoading] ? spinner : icon}
                   </button>
@@ -240,6 +241,7 @@ export default function Login(){
         </div>
       </div>
     </div>
+    <Footer/>
     </div>
   );
 };

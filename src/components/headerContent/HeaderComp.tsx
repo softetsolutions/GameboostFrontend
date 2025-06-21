@@ -96,16 +96,26 @@ const Navbar = () => {
 
               {isloggedIn ? (
                 <>
-                  <button className="px-5 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                  <button   onClick={() => navigate("/orders")}
+                  className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
                     Create Offer
+                  </button>
+                  <button  
+                    onClick={() => navigate("/chat")} 
+                  className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                    <i className="fa-solid fa-message"></i>
+                  </button>
+                  <button   
+                  className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                   <i className="fa-solid fa-bell"></i>
                   </button>
                   <div className="relative group inline-block">
                     <button
-                      className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-6 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                      className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-5 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
                       tabIndex={0}
                     >
                       <i className="fa-solid fa-circle-user text-3xl"></i>
-                      Profile
+                      
                       <svg
                         className="w-4 h-4"
                         fill="none"

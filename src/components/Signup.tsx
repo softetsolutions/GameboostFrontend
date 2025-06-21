@@ -5,6 +5,7 @@ import { signupUser } from "../api/api";
 import { useNavigate } from "react-router-dom"; 
 import { useState } from "react";
 import Navbar from "./headerContent/HeaderComp";
+import Footer from "./footer";
 
 
 export default function Signup() {
@@ -53,11 +54,11 @@ export default function Signup() {
   
   
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex flex-col">
       <Navbar/>
-    <div className="flex-grow flex items-center justify-center min-h-screen bg-black px-4 py-30">
+    <div className="flex-grow flex items-center justify-center min-h-screen  bg-gradient-to-b from-gray-800/20 to-gray-800/70 px-4 py-30">
       <div className="w-full max-w-md">
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
+        <div className="border border-gray-800/90 rounded-2xl  hover:border-cyan-600/30 shadow-2xl hover:shadow-gray-800/70 bg-gradient-to-b from-gray-800/70 to-gray-800/80 overflow-hidden ">
           <div className="h-2 bg-gradient-to-r from-blue-100 to-cyan-500"></div>
 
           <div className="p-8">
@@ -85,7 +86,7 @@ export default function Signup() {
                   name="firstname"
                   value = {formData.firstname}
                   onChange={handleChange}
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                   className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   placeholder="First Name"
                   required
                 />
@@ -104,7 +105,7 @@ export default function Signup() {
                   name="lastname"
                   value={formData.lastname}
                   onChange={handleChange}
-                  className="w-full p-3 bg-zinc-800  border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   placeholder="Last Name"
                   required
                 />
@@ -122,7 +123,7 @@ export default function Signup() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full p-3 bg-zinc-800  border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   placeholder="user@example.com"
                   required
                 />
@@ -141,7 +142,7 @@ export default function Signup() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full p-3 bg-zinc-800  border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   placeholder="••••••••"
                   required
                 />
@@ -167,7 +168,8 @@ export default function Signup() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full p-3 bg-zinc-800  border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blye-300 "
+                  
+                   className="w-full p-3 bg-gray-600/40 border border-gray-700 placeholder-gray-400 rounded-lg hover:border-cyan-600/50  focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   placeholder="••••••••"
                   required
                 />
@@ -194,7 +196,7 @@ export default function Signup() {
               .
               </div>
               <button type="submit"
-              className="w-full py-3 bg-blue-300 text-black font-medium rounded-lg hover:cursor-pointer hover:bg-cyan-400 transition">
+              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-800 shadow-md hover:shadow-cyan-500/30  text-white font-medium rounded-lg hover:cursor-pointer hover:bg-cyan-400 transition">
                 Sign Up
               </button>
             </form>
@@ -202,6 +204,7 @@ export default function Signup() {
         </div>
       </div>
     </div>
+    <Footer/>
     </div>
   );
 }
