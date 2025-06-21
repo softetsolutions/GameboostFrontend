@@ -1,4 +1,3 @@
-// import Homepage from "./homepage/Homepage";
 import { Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -16,9 +15,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // import ProfilePage from "./components/profilePage/ProfilePage"; TO BE INTEGRATED
 // import BuyCardComp from "./components/orderContent/BuyCardComp"; // TO BE INTEGRATED
 import Homepage from "./homepage/Homepage";
+import RenderOfferOrOfferForm from "./components/RenderOfferOrOfferForm";
 
 function App() {
-  return (
+  return (  
     <Routes>
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
@@ -64,6 +64,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="offers"
+          element={
+            <ProtectedRoute routeName="manageOffers">
+              <RenderOfferOrOfferForm />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Seller Routes*/}
@@ -85,10 +93,10 @@ function App() {
           }
         />
         <Route
-          path="manageOffers"
+          path="offers"
           element={
             <ProtectedRoute routeName="manageOffers">
-              <div>Manage Offers Component</div>
+              <RenderOfferOrOfferForm />
             </ProtectedRoute>
           }
         />

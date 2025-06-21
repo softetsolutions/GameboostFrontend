@@ -95,6 +95,10 @@ export default function Sidebar() {
       return basePath;
     }
 
+    if (item === "manageOffers") {
+      return `${basePath}/offers`;
+    }
+
     // For other routes, append to base path
     return `${basePath}/${item}`;
   };
@@ -140,16 +144,17 @@ export default function Sidebar() {
                 key={item}
                 to={routePath}
                 end={item === "dashboard" || item === "home"}
-                className={({ isActive }) => {
+                className={({ isActive, isPending }) => {
                   const baseClasses =
                     "group flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-300";
                   const activeClass =
                     "bg-gradient-to-r from-cyan-500/20 to-blue-700/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/20";
                   const inactiveClass =
                     "text-gray-400 hover:bg-gray-800/50 hover:text-cyan-400 border border-transparent hover:border-cyan-500/20";
+                  const isOffersActive = item === "manageOffers" && (isActive || isPending || window.location.pathname.includes("/offers"));
 
                   return `${baseClasses} ${
-                    isActive ? activeClass : inactiveClass
+                    isActive || isPending || isOffersActive ? activeClass : inactiveClass
                   }`;
                 }}
               >
