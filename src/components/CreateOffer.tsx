@@ -9,8 +9,6 @@ import {
 } from "../api/products";
 import type { Product } from "../api/products";
 import { createOffer } from "../api/offers";
-import { jwtDecode } from "jwt-decode";
-import { getAuthInfo } from "../utils/auth";
 
 interface Brand extends Product {}
 
@@ -158,18 +156,6 @@ function CreateOffer() {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
-
-    // Check role from token
-    const { token } = getAuthInfo();
-    if (token) {
-      const decoded: any = jwtDecode(token);
-      console.log('User role from token:', decoded.role);
-      if (decoded.role !== "seller") {
-        setError("Only sellers can create offers.");
-        setIsSubmitting(false);
-        return;
-      }
-    }
 
     try {
       // Validate required fields
