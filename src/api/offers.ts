@@ -35,7 +35,7 @@ export interface ApiOffer {
 }
 
 export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> => {
-  const { token, userId: seller } = getAuthInfo();
+  const { userId: seller } = getAuthInfo();
 
   const payload = {
     product: offerData.brand,
@@ -55,7 +55,6 @@ export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> =
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
     body: JSON.stringify(payload),
@@ -72,13 +71,11 @@ export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> =
 };
 
 export const fetchOffers = async (): Promise<ApiOffer[]> => {
-  const { token } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/offers`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
   });
@@ -103,13 +100,11 @@ export const fetchOffers = async (): Promise<ApiOffer[]> => {
 };
 
 export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
-  const { token } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
   });
@@ -129,8 +124,6 @@ export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
 };
 
 export const updateOffer = async (offerId: string, offerData: OfferFormData): Promise<ApiOffer> => {
-  const { token } = getAuthInfo();
-
   const payload = {
     product: offerData.brand,
     offerDetails: Object.entries(offerData.dynamicFields).map(
@@ -148,7 +141,6 @@ export const updateOffer = async (offerId: string, offerData: OfferFormData): Pr
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
     body: JSON.stringify(payload),
@@ -162,16 +154,14 @@ export const updateOffer = async (offerId: string, offerData: OfferFormData): Pr
   }
 
   return response.json();
-};
+}; 
 
 export const deleteOffer = async (offerId: string): Promise<{ message: string }> => {
-  const { token } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
     },
     credentials: 'include',
   });
@@ -184,4 +174,26 @@ export const deleteOffer = async (offerId: string): Promise<{ message: string }>
   }
 
   return response.json();
+}; 
+
+export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
+  const { userId } = getAuthInfo();
+
+  const response = await fetch(`${API_BASE_URL}/offers/seller/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch offers");
+  }
+
+  const result = await response.json();
+  if (result && Array.isArray(result.data)) {
+    return result.data;
+  }
+  throw new Error("Invalid response format from server");
 }; 

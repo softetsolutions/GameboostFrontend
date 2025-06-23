@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { fetchOffers, deleteOffer, type ApiOffer } from "../api/offers";
+import { fetchOffersBySellerId, deleteOffer, type ApiOffer } from "../api/offers";
 import { Trash2 } from 'lucide-react';
 
 interface ManageOffersProps {
@@ -8,7 +8,7 @@ interface ManageOffersProps {
   onEditOffer?: (offerId: string) => void;
 }
 
-function ManageOffers({ onCreateNew, onEditOffer }: ManageOffersProps) {
+function ManageOffers({ onEditOffer }: ManageOffersProps) {
   const [offers, setOffers] = useState<ApiOffer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,7 +17,7 @@ function ManageOffers({ onCreateNew, onEditOffer }: ManageOffersProps) {
     const loadOffers = async () => {
       setIsLoading(true);
       try {
-        const fetchedOffers = await fetchOffers();
+        const fetchedOffers = await fetchOffersBySellerId();
         // Ensure offers is always an array
         const offersArray = Array.isArray(fetchedOffers) ? fetchedOffers : [];
         setOffers(offersArray);
@@ -46,12 +46,6 @@ function ManageOffers({ onCreateNew, onEditOffer }: ManageOffersProps) {
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed to delete offer");
       }
-    }
-  };
-
-  const handleCreateNew = () => {
-    if (onCreateNew) {
-      onCreateNew();
     }
   };
 
@@ -159,19 +153,19 @@ function ManageOffers({ onCreateNew, onEditOffer }: ManageOffersProps) {
                   >
                     <Trash2 size={16} />
                   </button>
-                  <svg
-                    className="w-5 h-5 text-gray-400 group-hover:text-cyan-400 transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                <svg
+                  className="w-5 h-5 text-gray-400 group-hover:text-cyan-400 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
                 </div>
               </div>
 
