@@ -176,7 +176,9 @@ function ManageOffers({ onEditOffer }: ManageOffersProps) {
                     {offer.product.title}
                   </h3>
                   <p className="text-sm text-gray-400">
-                    {offer.product.service}
+                    {typeof offer.product.service === 'object' && offer.product.service !== null
+                      ? offer.product.service.name
+                      : offer.product.service}
                   </p>
                 </div>
 

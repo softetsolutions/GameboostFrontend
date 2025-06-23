@@ -11,6 +11,7 @@ import ProductForm from "./ProductForm.js";
 import ProductFields from "./ProductFields.js";
 import FormHeader from "./FormHeader.js";
 import FormActions from "./FormActions.js";
+import ImageUpload from "../../ui/ImageUpload";
 
 interface Field {
   id: number;
@@ -38,6 +39,7 @@ function CreateProduct() {
     service: "",
     serviceName: "",
     productRequiredFields: [],
+    images: [],
   });
 
   // Fields configuration
@@ -83,7 +85,7 @@ function CreateProduct() {
           : field.type === "range"
           ? [`${field.minValue}-${field.maxValue}`]
           : [],
-      required: field.required,
+      isrequired: field.required,
     }));
   };
 
@@ -92,12 +94,19 @@ function CreateProduct() {
     setIsSubmitting(true);
     setError("");
 
+    if (!formData.images || formData.images.length === 0) {
+      setError("Please upload at least one product image.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const productRequiredFields = transformFieldsForApi();
 
       const response = (await createProduct({
         ...formData,
         productRequiredFields,
+        images: formData.images,
       })) as unknown as CreateProductResponse;
 
       if (response.success) {
@@ -174,6 +183,12 @@ function CreateProduct() {
           />
 
           <ProductFields fields={fields} setFields={setFields} />
+
+          <ImageUpload
+            images={formData.images || []}
+            onImagesChange={(imgs) => setFormData((prev) => ({ ...prev, images: imgs }))}
+            maxImages={5}
+          />
 
           <FormActions isSubmitting={isSubmitting} onCancel={handleCancel} />
         </form>

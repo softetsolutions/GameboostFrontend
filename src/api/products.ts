@@ -36,6 +36,20 @@ export interface Product {
   updatedAt?: string;
 }
 
+export interface HomePageProduct {
+  _id: string;
+  title: string;
+  images: string[];
+  offerCount: number;
+}
+
+export interface HomePageService {
+  _id: string;
+  name: string;
+  icon: string;
+  products: HomePageProduct[];
+}
+
 export const createProduct = async (
   productData: ProductFormData
 ): Promise<Product> => {
@@ -113,4 +127,22 @@ export const fetchProductById = async (productId: string): Promise<Product> => {
     console.error("Failed to parse product details ", error);
     throw new Error("Failed to parse product details");
   }
+};
+
+export const fetchHomePageData = async (): Promise<HomePageService[]> => {
+  const response = await fetch(`${API_BASE_URL}/products/home`, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch homepage data");
+  }
+
+  const res = await response.json();
+  if (res.success && Array.isArray(res.data)) {
+    return res.data;
+  }
+  throw new Error("Invalid homepage data format");
 };

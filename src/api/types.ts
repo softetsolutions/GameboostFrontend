@@ -12,6 +12,7 @@ export interface ProductFormData {
   service: string;
   serviceName: string;
   productRequiredFields: ProductField[];
+  images?: string[];
 }
 
 export interface ProductField {

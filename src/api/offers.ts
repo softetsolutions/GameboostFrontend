@@ -18,7 +18,7 @@ export interface ApiOffer {
     _id: string;
     title: string;
     type: string;
-    service: string;
+    service: { _id: string; name: string } | string;
   };
   seller: {
     _id: string;
