@@ -16,8 +16,18 @@ import Homepage from "./homepage/Homepage";
 import RenderOfferOrOfferForm from "./components/RenderOfferOrOfferForm";
 import ProductPageComp from "./components/ProductPageComp";
 import BuyCardComp from "./components/orderContent/BuyCardComp";
+import Order from "./components/Orders/Order";
+import Chat from "./components/Chat/Chat";
+import Adminchat from "./components/Chat/Adminchat";
+import Group from "./components/Chat/Group";
+import DM from "./components/Chat/DM";
+
 
 function App() {
+
+
+
+
   return (  
     <Routes>
       <Route path="/" element={<Homepage />} />
@@ -140,7 +150,15 @@ function App() {
       </Route>
 
       <Route path="/buy/:offerId" element={<BuyCardComp />} />
+      <Route path="/orders" element={<Order/>}/>
+      <Route  path="/adminchat" element={<Adminchat />}/>
+      <Route path="/chat" element={<Chat/>}/>
+      
+      <Route path="/groupchat" element={<Group />}/>
+      <Route path="/DMs" element={<DM/>}/>
+
     </Routes>
+    
   );
 }
 

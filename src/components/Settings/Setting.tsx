@@ -6,14 +6,15 @@ import { useState } from "react";
 import Social from "./Social";
 import Privacy from "./Privacy";
 import Verification from "./Verification";
+import Footer from "../footer";
 
 export default function Setting() {
   const [activeform, setactiveform] = useState<number | null>(1);
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex flex-col">
       <Navbar />
-      <div className="flex-grow flex items-center justify-center min-h-screen bg-black px-4 py-30">
+      <div className="flex-grow flex items-center justify-center min-h-screen bg-black px-5 py-30">
         <div className="w-full ">
           <Link
             to="/"
@@ -45,6 +46,7 @@ export default function Setting() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }
