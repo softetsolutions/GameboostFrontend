@@ -84,7 +84,7 @@ export const createProduct = async (
 export const fetchProductsByService = async (
   serviceId: string
 ): Promise<Product[]> => {
-  const response = await fetch(`${API_BASE_URL}/products?service=${serviceId}`, {
+  const response = await fetch(`${API_BASE_URL}/products/service/${serviceId}`, {
     credentials: "include",
     headers: {
       Accept: "application/json",
