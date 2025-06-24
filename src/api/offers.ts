@@ -197,3 +197,26 @@ export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
   }
   throw new Error("Invalid response format from server");
 }; 
+
+export const fetchOffersByProductAndService = async (productId: string, serviceId: string): Promise<ApiOffer[]> => {
+  const response = await fetch(`${API_BASE_URL}/offers/filter?productId=${productId}&serviceId=${serviceId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({ message: `Failed to fetch offers: ${response.status}` }));
+    throw new Error(errorData.message || "Failed to fetch offers");
+  }
+
+  const result = await response.json();
+  if (result.success && Array.isArray(result.data)) {
+    return result.data;
+  }
+  throw new Error("Invalid response format from server");
+}; 

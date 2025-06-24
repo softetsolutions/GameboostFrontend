@@ -12,10 +12,10 @@ import CreateProduct from "./components/admin/CreateProduct/CreateProduct";
 import CreateService from "./components/admin/CreateService";
 import CreateOffer from "./components/CreateOffer";
 import ProtectedRoute from "./components/ProtectedRoute";
-// import ProfilePage from "./components/profilePage/ProfilePage"; TO BE INTEGRATED
-// import BuyCardComp from "./components/orderContent/BuyCardComp"; // TO BE INTEGRATED
 import Homepage from "./homepage/Homepage";
 import RenderOfferOrOfferForm from "./components/RenderOfferOrOfferForm";
+import ProductPageComp from "./components/ProductPageComp";
+import BuyCardComp from "./components/orderContent/BuyCardComp";
 
 function App() {
   return (  
@@ -27,6 +27,7 @@ function App() {
       <Route path="/account" element={<Account />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/verification" element={<Verification />} />
+      <Route path="/product" element={<ProductPageComp />} />
       <Route
         path="/language"
         element={
@@ -137,6 +138,8 @@ function App() {
           }
         />
       </Route>
+
+      <Route path="/buy/:offerId" element={<BuyCardComp />} />
     </Routes>
   );
 }

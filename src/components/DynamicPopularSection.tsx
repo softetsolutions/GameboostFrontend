@@ -1,22 +1,26 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import PopularGameCard from "./PopularGameCard";
+import { fetchOffersByProductAndService } from "../api/offers";
+import toast from "react-hot-toast";
 
 type Product = {
   _id: string;
   title: string;
   images: string[];
   offerCount: number;
+  service?: string;
 };
 
 type DynamicPopularSectionProps = {
   title: string;
   products: Product[];
-  onCardClick?: (product: Product) => void;
 };
 
 const CARDS_PER_VIEW = 4;
 
-const DynamicPopularSection = ({ title, products, onCardClick }: DynamicPopularSectionProps) => {
+const DynamicPopularSection = ({ title, products }: DynamicPopularSectionProps) => {
+  const navigate = useNavigate();
   const [startIdx, setStartIdx] = useState(0);
   const maxIdx = Math.max(0, products.length - CARDS_PER_VIEW);
   
@@ -25,6 +29,23 @@ const DynamicPopularSection = ({ title, products, onCardClick }: DynamicPopularS
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleCardClick = async (product: Product) => {
+    if (isDragging) return;
+    
+    try {
+      if (!product.service) {
+        throw new Error("Service ID not found for product");
+      }
+      
+      // Fetch offers for the product
+      await fetchOffersByProductAndService(product._id, product.service);
+      navigate(`/product?productId=${product._id}&serviceId=${product.service}`, { state: { serviceName: title } });
+    } catch (error) {
+      console.error("Error navigating to product page:", error);
+      toast.error("Failed to load product offers");
+    }
+  };
 
   const handlePrev = () => {
     setStartIdx((prev) => Math.max(0, prev - CARDS_PER_VIEW));
@@ -116,7 +137,7 @@ const DynamicPopularSection = ({ title, products, onCardClick }: DynamicPopularS
                 image={product.images?.[0] || ""}
                 title={product.title}
                 offerCount={product.offerCount}
-                onClick={() => !isDragging && onCardClick?.(product)}
+                onClick={() => handleCardClick(product)}
               />
             </div>
           ))}

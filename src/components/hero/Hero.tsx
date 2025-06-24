@@ -60,9 +60,6 @@ const HeroSection = () => {
 
   const handleSearch = () => {
   };
-  const handleGameClick = (gameName: string) => {
-    console.log("Selected game:", gameName)
-  }
   const nextSlide = () => {
     setCurrentSlide((prev) => {
       const maxSlides = Math.ceil(serviceCards.length / 3) - 1;
@@ -189,8 +186,7 @@ const HeroSection = () => {
               <DynamicPopularSection
                 key={section._id}
                 title={section.name}
-                products={section.products}
-                onCardClick={(product) => handleGameClick(product.title)}
+                products={section.products.map(product => ({ ...product, service: section._id }))}
               />
             ))}
           </div>
