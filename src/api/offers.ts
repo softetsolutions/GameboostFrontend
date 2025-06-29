@@ -22,6 +22,8 @@ export interface ApiOffer {
   };
   seller: {
     _id: string;
+    displayName?: string;
+    username?: string;
   };
   offerDetails: Array<{ fieldName: string; value: any }>;
   price: number;

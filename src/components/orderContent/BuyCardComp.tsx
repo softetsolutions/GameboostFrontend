@@ -67,9 +67,17 @@ function BuyCardComp() {
         <div className="flex-1 lg:pr-8 rounded-xl shadow-lg border border-gray-700 bg-gray-900/80 backdrop-blur-lg">
           {/* Product Title and Share Button */}
           <div className="p-6 mb-6 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-100 leading-tight">
-              {offer ? offer.product.title : 'Loading...'}
-            </h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-100 leading-tight">
+                {offer ? offer.product.title : 'Loading...'}
+              </h1>
+              {offer && offer.seller && (
+                <div className="mt-1 text-gray-400 text-sm">
+                  Seller: <span className="text-gray-200 font-semibold">{offer.seller.displayName || offer.seller.username || offer.seller._id}</span>
+                  <span className="ml-2 text-gray-500">(ID: {offer.seller._id})</span>
+                </div>
+              )}
+            </div>
             <button className="flex items-center px-4 py-2 border border-gray-700 rounded-md text-gray-400 text-sm hover:bg-gray-800 hover:text-cyan-400 transition duration-150">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 0a3 3 0 110 2.684m0-2.684a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
@@ -133,6 +141,26 @@ function BuyCardComp() {
                     )}
                   </div>
                 </div>
+                {/* Seller Info */}
+                {offer.seller && (
+                  <div className="mt-8 p-5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-xl border border-cyan-700/40 shadow-lg flex items-center space-x-4">
+                    <div className="flex-shrink-0 bg-cyan-700/20 rounded-full p-3 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center">
+                        <span className="text-gray-400 text-sm mr-2">Seller Name:</span>
+                        <span className="text-cyan-300 font-semibold text-base">{offer.seller.displayName || offer.seller.username || offer.seller._id}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-gray-400 text-sm mr-2">Seller ID:</span>
+                        <span className="text-gray-200 font-mono text-sm">{offer.seller._id}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-gray-400">Loading product info...</p>
