@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ManageProducts from "./ManageProducts";
 import ProductForm from "./ProductForm.tsx";
-import { API_BASE_URL } from "../../api/config";
+import { fetchProductById } from "../../api/products";
 
 interface Product {
   _id: string;
@@ -36,18 +36,7 @@ function RenderProductOrProductForm() {
         setIsLoading(true);
         setError("");
         try {
-          const response = await fetch(`${API_BASE_URL}/products/${selectedProductId}`, {
-            credentials: "include",
-            headers: {
-              Accept: "application/json",
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to load product details");
-          }
-
-          const product = await response.json();
+          const product = await fetchProductById(selectedProductId);
           setProductToEdit(product);
         } catch (err) {
           setError(err instanceof Error ? err.message : "Failed to load product details");

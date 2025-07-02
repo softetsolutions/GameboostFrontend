@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { API_BASE_URL } from "../../api/config";
 import ImageUpload from "../ui/ImageUpload";
 import CustomDropdown from "../ui/CustomDropdown";
 import ProductFields from "../admin/CreateProduct/ProductFields";
+import { fetchServices } from "../../api/services";
+import { createProduct, updateProduct } from "../../api/products";
 
 interface Product {
   _id: string;
@@ -133,18 +134,7 @@ function ProductForm({ mode, productData, onSuccess, onCancel }: ProductFormProp
   useEffect(() => {
     const loadServices = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/services`, {
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch services");
-        }
-
-        const data = await response.json();
+        const data = await fetchServices();
         setServices(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error loading services:", error);
@@ -253,44 +243,24 @@ function ProductForm({ mode, productData, onSuccess, onCancel }: ProductFormProp
 
       // Transform fields for API
       const productRequiredFields = transformFieldsForApi();
-      const submitData = {
-        ...formData,
-        productRequiredFields,
-      };
 
       if (mode === 'create') {
-        const response = await fetch(`${API_BASE_URL}/products`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(submitData),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "Failed to create product" }));
-          throw new Error(errorData.message || "Failed to create product");
-        }
-
+        const createPayload = {
+          ...formData,
+          productRequiredFields,
+        };
+        await createProduct(createPayload);
         toast.success("Product created successfully!");
       } else if (mode === 'edit' && productData) {
-        const response = await fetch(`${API_BASE_URL}/products/${productData._id}`, {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(submitData),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "Failed to update product" }));
-          throw new Error(errorData.message || "Failed to update product");
-        }
-
+        const updatePayload = {
+          title: formData.title,
+          type: formData.type,
+          description: formData.description,
+          service: { _id: formData.service, name: formData.serviceName },
+          productRequiredFields,
+          images: formData.images,
+        };
+        await updateProduct(productData._id, updatePayload);
         toast.success("Product updated successfully!");
       }
 

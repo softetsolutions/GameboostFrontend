@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { API_BASE_URL } from "../../api/config";
 import ConfirmationModal from "../ui/ConfirmationModal";
-
-interface Service {
-  _id: string;
-  name: string;
-  icon: string;
-  showOnHome?: boolean;
-  createdAt: string;
-  __v: number;
-}
+import { fetchAllServices, deleteService, updateServiceVisibility } from "../../api/services";
+import type { Service } from "../../api/services";
 
 interface ManageServicesProps {
   onEditService?: (serviceId: string) => void;
@@ -29,19 +21,8 @@ export default function ManageServices({ onEditService }: ManageServicesProps) {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/services`, {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch services");
-      }
-
-      const data = await response.json();
-      setServices(Array.isArray(data) ? data : []);
+      const services = await fetchAllServices();
+      setServices(services);
     } catch (error) {
       console.error("Error fetching services:", error);
       toast.error("Failed to fetch services");
@@ -63,19 +44,7 @@ export default function ManageServices({ onEditService }: ManageServicesProps) {
 
   const handleToggleShowOnHome = async (serviceId: string, currentShowOnHome: boolean) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/services/select`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ serviceId, show: !currentShowOnHome }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to update visibility");
-      }
+      await updateServiceVisibility(serviceId, !currentShowOnHome);
       setServices(prev =>
         prev.map(service =>
           service._id === serviceId
@@ -93,18 +62,7 @@ export default function ManageServices({ onEditService }: ManageServicesProps) {
     if (!serviceToDelete) return;
     setShowDeleteModal(false);
     try {
-      const response = await fetch(`${API_BASE_URL}/services/${serviceToDelete.id}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete service");
-      }
-
+      await deleteService(serviceToDelete.id);
       setServices(prev => prev.filter(service => service._id !== serviceToDelete.id));
       toast.success("Service deleted successfully");
     } catch (error) {

@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "./config";
-import { getAuthInfo } from "../utils/auth";
+import { getAuthInfo, handleUnauthorized } from "../utils/auth";
 
 export interface OfferFormData {
   brand: string; //productId
@@ -37,7 +37,14 @@ export interface ApiOffer {
 }
 
 export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> => {
-  const { userId: seller } = getAuthInfo();
+  let seller: string;
+  try {
+    const auth = getAuthInfo();
+    seller = auth.userId;
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
 
   const payload = {
     product: offerData.brand,
@@ -62,6 +69,7 @@ export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> =
     body: JSON.stringify(payload),
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -73,6 +81,12 @@ export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> =
 };
 
 export const fetchOffers = async (): Promise<ApiOffer[]> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
 
   const response = await fetch(`${API_BASE_URL}/offers`, {
     method: "GET",
@@ -82,6 +96,7 @@ export const fetchOffers = async (): Promise<ApiOffer[]> => {
     credentials: "include",
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -102,6 +117,12 @@ export const fetchOffers = async (): Promise<ApiOffer[]> => {
 };
 
 export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: "GET",
@@ -111,6 +132,7 @@ export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
     credentials: "include",
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -126,6 +148,13 @@ export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
 };
 
 export const updateOffer = async (offerId: string, offerData: OfferFormData): Promise<ApiOffer> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+
   const payload = {
     product: offerData.brand,
     offerDetails: Object.entries(offerData.dynamicFields).map(
@@ -148,6 +177,7 @@ export const updateOffer = async (offerId: string, offerData: OfferFormData): Pr
     body: JSON.stringify(payload),
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -159,6 +189,12 @@ export const updateOffer = async (offerId: string, offerData: OfferFormData): Pr
 }; 
 
 export const deleteOffer = async (offerId: string): Promise<{ message: string }> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: 'DELETE',
@@ -168,6 +204,7 @@ export const deleteOffer = async (offerId: string): Promise<{ message: string }>
     credentials: 'include',
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -179,6 +216,12 @@ export const deleteOffer = async (offerId: string): Promise<{ message: string }>
 }; 
 
 export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
   const { userId } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/offers/seller/${userId}`, {
@@ -189,6 +232,7 @@ export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
     credentials: "include",
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     throw new Error("Failed to fetch offers");
   }

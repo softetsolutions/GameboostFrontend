@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ManageServices from "./ManageServices";
 import ServiceForm from "./ServiceForm.tsx";
-import { API_BASE_URL } from "../../api/config";
+import { fetchServiceById } from "../../api/services";
 
 interface Service {
   _id: string;
@@ -25,18 +25,7 @@ function RenderServiceOrServiceForm() {
         setIsLoading(true);
         setError("");
         try {
-          const response = await fetch(`${API_BASE_URL}/services/${selectedServiceId}`, {
-            credentials: "include",
-            headers: {
-              Accept: "application/json",
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to load service details");
-          }
-
-          const service = await response.json();
+          const service = await fetchServiceById(selectedServiceId);
           setServiceToEdit(service);
         } catch (err) {
           setError(err instanceof Error ? err.message : "Failed to load service details");

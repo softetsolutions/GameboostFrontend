@@ -1,28 +1,9 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
-import { API_BASE_URL } from "../../api/config";
 import ConfirmationModal from "../ui/ConfirmationModal";
-
-interface Product {
-  _id: string;
-  title: string;
-  type: string;
-  description: string;
-  service: {
-    _id: string;
-    name: string;
-  };
-  productRequiredFields: Array<{
-    fieldName: string;
-    fieldType: string;
-    options: string[];
-    isrequired: boolean;
-  }>;
-  images?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+import { fetchAllProducts, deleteProduct } from "../../api/products";
+import type { Product } from "../../api/products";
 
 interface ServiceGroup {
   serviceName: string;
@@ -47,19 +28,8 @@ export default function ManageProducts({ onEditProduct }: ManageProductsProps) {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products`, {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-
-      const data = await response.json();
-      setProducts(Array.isArray(data.data) ? data.data : []);
+      const products = await fetchAllProducts();
+      setProducts(products);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("Failed to fetch products");
@@ -103,18 +73,7 @@ export default function ManageProducts({ onEditProduct }: ManageProductsProps) {
     if (!productToDelete) return;
     setShowDeleteModal(false);
     try {
-      const response = await fetch(`${API_BASE_URL}/products/${productToDelete.id}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete product");
-      }
-
+      await deleteProduct(productToDelete.id);
       setProducts(prev => prev.filter(product => product._id !== productToDelete.id));
       toast.success("Product deleted successfully");
     } catch (error) {
