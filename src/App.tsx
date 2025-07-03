@@ -170,7 +170,11 @@ function App() {
       <Route path="/buy/:offerId" element={<BuyCardComp />} />
       <Route path="/orders" element={<Order/>}/>
       <Route  path="/adminchat" element={<Adminchat />}/>
-      <Route path="/chat" element={<Chat/>}/>
+      <Route path="/chat" element={
+        <ProtectedRoute routeName="chat">
+          <Chat/>
+        </ProtectedRoute>
+      }/>
       
       <Route path="/groupchat" element={<Group />}/>
       <Route path="/DMs" element={<DM/>}/>
