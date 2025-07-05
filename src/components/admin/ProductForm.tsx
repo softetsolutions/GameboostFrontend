@@ -22,7 +22,7 @@ interface Product {
     options: string[];
     isrequired: boolean;
   }>;
-  images?: string[];
+  images?: (File | string)[];
   createdAt: string;
   updatedAt: string;
 }
@@ -45,7 +45,7 @@ interface ProductFormData {
     options: string[];
     isrequired: boolean;
   }>;
-  images?: string[];
+  images?: (File | string)[];
 }
 
 interface ProductFormProps {
@@ -73,7 +73,6 @@ function ProductForm({ mode, productData, onSuccess, onCancel }: ProductFormProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [services, setServices] = useState<Service[]>([]);
-  const [fields, setFields] = useState<Field[]>([]);
 
   const [formData, setFormData] = useState<ProductFormData>({
     title: "",
@@ -85,49 +84,47 @@ function ProductForm({ mode, productData, onSuccess, onCancel }: ProductFormProp
     images: [],
   });
 
-  // Helper function to transform fields for API
+  // Fields configuration
+  const [fields, setFields] = useState<Field[]>([
+    {
+      id: 1,
+      name: "",
+      type: "custom",
+      customValues: [],
+      minValue: 0,
+      maxValue: 100,
+      required: false,
+    },
+  ]);
+
   const transformFieldsForApi = () => {
     return fields.map((field) => ({
       fieldName: field.name,
       fieldType: field.type,
-      options: field.type === "range" 
-        ? [`${field.minValue}-${field.maxValue}`] 
-        : field.customValues,
+      options:
+        field.type === "custom"
+          ? field.customValues
+          : field.type === "range"
+          ? [`${field.minValue}-${field.maxValue}`]
+          : [],
       isrequired: field.required,
     }));
   };
 
-  // Helper function to transform API fields to local format
   const transformApiFieldsToLocal = (apiFields: any[]) => {
-    return apiFields.map((field, index) => {
-      let type: "custom" | "range" | "text" = "text";
-      let customValues: string[] = [];
-      let minValue = 0;
-      let maxValue = 100;
-
-      if (field.fieldType === "range") {
-        type = "range";
-        if (field.options && field.options.length > 0) {
-          const rangeStr = field.options[0];
-          const [min, max] = rangeStr.split("-").map(Number);
-          minValue = min || 0;
-          maxValue = max || 100;
-        }
-      } else if (field.fieldType === "custom") {
-        type = "custom";
-        customValues = field.options || [];
-      }
-
-      return {
-        id: index + 1,
-        name: field.fieldName,
-        type,
-        customValues,
-        minValue,
-        maxValue,
-        required: field.isrequired,
-      };
-    });
+    return apiFields.map((field, index) => ({
+      id: index + 1,
+      name: field.fieldName,
+      type: field.fieldType,
+      customValues: field.options || [],
+      minValue: field.fieldType === "range" && field.options?.[0] 
+        ? parseInt(field.options[0].split("-")[0]) || 0 
+        : 0,
+      maxValue: field.fieldType === "range" && field.options?.[0] 
+        ? parseInt(field.options[0].split("-")[1]) || 100 
+        : 100,
+      required: field.isrequired,
+    }));
   };
 
   // Fetch services on component mount
@@ -216,7 +213,7 @@ function ProductForm({ mode, productData, onSuccess, onCancel }: ProductFormProp
     }));
   };
 
-  const handleImagesChange = (images: string[]) => {
+  const handleImagesChange = (images: (File | string)[]) => {
     setFormData((prev) => ({
       ...prev,
       images,
@@ -245,22 +242,46 @@ function ProductForm({ mode, productData, onSuccess, onCancel }: ProductFormProp
       const productRequiredFields = transformFieldsForApi();
 
       if (mode === 'create') {
-        const createPayload = {
-          ...formData,
-          productRequiredFields,
-        };
-        await createProduct(createPayload);
+        // Create FormData for file upload
+        const data = new FormData();
+        data.append("title", formData.title);
+        data.append("type", formData.type);
+        data.append("description", formData.description);
+        data.append("service", formData.service);
+        data.append("serviceName", formData.serviceName);
+        data.append("productRequiredFields", JSON.stringify(productRequiredFields));
+        
+        // Only append new files (not existing URLs)
+        if (formData.images) {
+          formData.images.forEach((image) => {
+            if (image instanceof File) {
+              data.append("images", image);
+            }
+          });
+        }
+
+        await createProduct(data);
         toast.success("Product created successfully!");
       } else if (mode === 'edit' && productData) {
-        const updatePayload = {
-          title: formData.title,
-          type: formData.type,
-          description: formData.description,
-          service: { _id: formData.service, name: formData.serviceName },
-          productRequiredFields,
-          images: formData.images,
-        };
-        await updateProduct(productData._id, updatePayload);
+        // Create FormData for update
+        const data = new FormData();
+        data.append("title", formData.title);
+        data.append("type", formData.type);
+        data.append("description", formData.description);
+        data.append("service", formData.service);
+        data.append("serviceName", formData.serviceName);
+        data.append("productRequiredFields", JSON.stringify(productRequiredFields));
+        
+        // Only append new files (not existing URLs)
+        if (formData.images) {
+          formData.images.forEach((image) => {
+            if (image instanceof File) {
+              data.append("images", image);
+            }
+          });
+        }
+
+        await updateProduct(productData._id, data);
         toast.success("Product updated successfully!");
       }
 

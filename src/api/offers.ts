@@ -36,7 +36,7 @@ export interface ApiOffer {
   createdAt: string;
 }
 
-export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> => {
+export const createOffer = async (offerData: FormData): Promise<ApiOffer> => {
   let seller: string;
   try {
     const auth = getAuthInfo();
@@ -46,27 +46,12 @@ export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> =
     throw new Error("No authentication token found");
   }
 
-  const payload = {
-    product: offerData.brand,
-    offerDetails: Object.entries(offerData.dynamicFields).map(
-      ([fieldName, value]) => ({ fieldName, value })
-    ),
-    price: offerData.price,
-    currency: offerData.currency,
-    quantityAvailable: offerData.quantityAvailable,
-    deliveryTime: offerData.deliveryTime,
-    instantDelivery: offerData.instantDelivery,
-    images: offerData.images,
-    seller,
-  };
+  offerData.append("seller", seller);
 
   const response = await fetch(`${API_BASE_URL}/offers`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     credentials: "include",
-    body: JSON.stringify(payload),
+    body: offerData,
   });
 
   if (response.status === 401) await handleUnauthorized();
@@ -147,7 +132,7 @@ export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
   throw new Error("Invalid response format for fetching an offer.");
 };
 
-export const updateOffer = async (offerId: string, offerData: OfferFormData): Promise<ApiOffer> => {
+export const updateOffer = async (offerId: string, offerData: FormData): Promise<ApiOffer> => {
   try {
     getAuthInfo();
   } catch {
@@ -155,26 +140,12 @@ export const updateOffer = async (offerId: string, offerData: OfferFormData): Pr
     throw new Error("No authentication token found");
   }
 
-  const payload = {
-    product: offerData.brand,
-    offerDetails: Object.entries(offerData.dynamicFields).map(
-      ([fieldName, value]) => ({ fieldName, value })
-    ),
-    price: offerData.price,
-    currency: offerData.currency,
-    quantityAvailable: offerData.quantityAvailable,
-    deliveryTime: offerData.deliveryTime,
-    instantDelivery: offerData.instantDelivery,
-    images: offerData.images,
-  };
-
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify(payload),
+    body: offerData,
   });
 
   if (response.status === 401) await handleUnauthorized();
@@ -186,7 +157,7 @@ export const updateOffer = async (offerId: string, offerData: OfferFormData): Pr
   }
 
   return response.json();
-}; 
+};
 
 export const deleteOffer = async (offerId: string): Promise<{ message: string }> => {
   try {

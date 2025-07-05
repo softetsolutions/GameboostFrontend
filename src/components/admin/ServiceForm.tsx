@@ -15,7 +15,6 @@ interface Service {
 
 interface ServiceFormData {
   name: string;
-  icon: string;
 }
 
 interface ServiceFormProps {
@@ -32,30 +31,20 @@ function ServiceForm({ mode, serviceData, onSuccess, onCancel }: ServiceFormProp
 
   const [formData, setFormData] = useState<ServiceFormData>({
     name: "",
-    icon: "",
   });
 
-  // Convert single icon to array for ImageUpload component
-  const [iconImages, setIconImages] = useState<string[]>([]);
+  // Handle icon as File object for new uploads or string for existing URLs
+  const [icon, setIcon] = useState<File | string | null>(null);
 
   useEffect(() => {
     if (mode === 'edit' && serviceData) {
       setFormData({
         name: serviceData.name,
-        icon: serviceData.icon,
       });
-      // Set icon images array for ImageUpload component
-      setIconImages(serviceData.icon ? [serviceData.icon] : []);
+      // Set existing icon URL
+      setIcon(serviceData.icon || null);
     }
   }, [mode, serviceData]);
-
-  // Update formData.icon when iconImages changes
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      icon: iconImages.length > 0 ? iconImages[0] : ""
-    }));
-  }, [iconImages]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -67,8 +56,12 @@ function ServiceForm({ mode, serviceData, onSuccess, onCancel }: ServiceFormProp
     }));
   };
 
-  const handleIconChange = (images: string[]) => {
-    setIconImages(images);
+  const handleIconChange = (images: (File | string)[]) => {
+    if (images.length > 0) {
+      setIcon(images[0]);
+    } else {
+      setIcon(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,14 +75,21 @@ function ServiceForm({ mode, serviceData, onSuccess, onCancel }: ServiceFormProp
       }
 
       if (mode === 'create') {
+        if (!icon) {
+          throw new Error("Please upload a service icon");
+        }
+
+        // Create FormData for file upload
+        const data = new FormData();
+        data.append("name", formData.name);
+        if (icon instanceof File) {
+          data.append("icon", icon);
+        }
+
         const response = await fetch(`${API_BASE_URL}/services/create`, {
           method: "POST",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(formData),
+          body: data,
         });
 
         if (!response.ok) {
@@ -99,14 +99,21 @@ function ServiceForm({ mode, serviceData, onSuccess, onCancel }: ServiceFormProp
 
         toast.success("Service created successfully!");
       } else if (mode === 'edit' && serviceData) {
+        // Create FormData for update
+        const data = new FormData();
+        data.append("name", formData.name);
+        
+        if (icon instanceof File) {
+          data.append("icon", icon);
+        } else if (typeof icon === 'string' && icon) {
+          // If it's an existing URL, send it as a form field
+          data.append("icon", icon);
+        }
+
         const response = await fetch(`${API_BASE_URL}/services/${serviceData._id}`, {
           method: "PUT",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(formData),
+          body: data,
         });
 
         if (!response.ok) {
@@ -205,7 +212,7 @@ function ServiceForm({ mode, serviceData, onSuccess, onCancel }: ServiceFormProp
               Service Icon
             </label>
             <ImageUpload
-              images={iconImages}
+              images={icon ? [icon] : []}
               onImagesChange={handleIconChange}
               maxImages={1}
               disabled={isSubmitting}

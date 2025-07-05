@@ -14,7 +14,7 @@ export interface ProductFormData {
     isrequired: boolean;
   }>;
   additionalFields?: any[];
-  images?: string[];
+  images?: (File | string)[];
 }
 
 export interface Product {
@@ -52,26 +52,18 @@ export interface HomePageService {
 }
 
 export const createProduct = async (
-  productData: ProductFormData
+  productData: FormData
 ): Promise<Product> => {
   const { token } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/products`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
     credentials: "include",
-    body: JSON.stringify({
-      ...productData,
-      ...(!productData.service &&
-        productData.serviceName && {
-          serviceName: productData.serviceName,
-          service: undefined,
-        }),
-    }),
+    body: productData,
   });
 
   if (response.status === 401) await handleUnauthorized();
@@ -185,7 +177,7 @@ export const deleteProduct = async (productId: string): Promise<void> => {
   }
 };
 
-export const updateProduct = async (productId: string, data: Partial<Product>): Promise<void> => {
+export const updateProduct = async (productId: string, data: FormData): Promise<void> => {
   try {
     getAuthInfo();
   } catch {
@@ -196,10 +188,9 @@ export const updateProduct = async (productId: string, data: Partial<Product>): 
     method: "PUT",
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify(data),
+    body: data,
   });
   if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {

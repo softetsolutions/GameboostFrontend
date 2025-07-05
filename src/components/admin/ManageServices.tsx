@@ -82,43 +82,23 @@ export default function ManageServices({ onEditService }: ManageServicesProps) {
       );
     }
 
-    // Check if it's a base64 image
-    if (icon.startsWith('data:image')) {
-      return (
-        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-700/50 flex items-center justify-center">
-          <img 
-            src={icon} 
-            alt="Service icon" 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // If image fails to load, show fallback
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                parent.innerHTML = '<span class="text-gray-400 text-lg">?</span>';
-              }
-            }}
-          />
-        </div>
-      );
-    }
-
-    // If it's a text icon (single character)
-    if (icon.length === 1) {
-      return (
-        <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-700 rounded-lg flex items-center justify-center">
-          <span className="text-white text-lg">{icon}</span>
-        </div>
-      );
-    }
-
-    // If it's a longer text or invalid base64, show first character or fallback
+    // Display the icon image
     return (
-      <div className="w-10 h-10 bg-gradient-to-r from-gray-600 to-gray-700 rounded-lg flex items-center justify-center">
-        <span className="text-gray-400 text-lg">
-          {icon.length > 0 ? icon.charAt(0).toUpperCase() : '?'}
-        </span>
+      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-700/50 flex items-center justify-center">
+        <img 
+          src={icon} 
+          alt="Service icon" 
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // If image fails to load, show fallback
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const parent = target.parentElement;
+            if (parent) {
+              parent.innerHTML = '<span class="text-gray-400 text-lg">?</span>';
+            }
+          }}
+        />
       </div>
     );
   };

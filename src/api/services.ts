@@ -33,18 +33,29 @@ export const fetchServices = async (): Promise<Service[]> => {
   return Array.isArray(data) ? data : [];
 };
 
-export const createService = async (service: CreateServiceRequest): Promise<Service> => {
+export const createService = async (service: CreateServiceRequest | FormData): Promise<Service> => {
   try {
     const { token } = getAuthInfo();
 
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    let body: string | FormData;
+
+    if (service instanceof FormData) {
+      body = service;
+    } else {
+      // For JSON requests
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(service);
+    }
+
     const response = await fetch(`${API_BASE_URL}/services/create`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
       credentials: "include",
-      body: JSON.stringify(service),
+      body,
     });
 
     if (response.status === 401) await handleUnauthorized();
@@ -156,7 +167,7 @@ export const fetchServiceById = async (serviceId: string): Promise<Service> => {
   return response.json();
 };
 
-export const updateService = async (serviceId: string, data: Partial<Service>): Promise<void> => {
+export const updateService = async (serviceId: string, data: FormData): Promise<void> => {
   try {
     getAuthInfo();
   } catch {
@@ -167,10 +178,9 @@ export const updateService = async (serviceId: string, data: Partial<Service>): 
     method: "PUT",
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify(data),
+    body: data,
   });
   if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {

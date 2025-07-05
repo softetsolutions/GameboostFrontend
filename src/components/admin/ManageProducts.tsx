@@ -101,26 +101,21 @@ export default function ManageProducts({ onEditProduct }: ManageProductsProps) {
       return null;
     }
 
-    // Check if it's a base64 image
-    if (images[0].startsWith('data:image')) {
-      return (
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-700/50 flex items-center justify-center">
-          <img 
-            src={images[0]} 
-            alt="Product image" 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // If image fails to load, hide the image
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-            }}
-          />
-        </div>
-      );
-    }
-
-    // If it's a URL or invalid, show nothing
-    return null;
+    const firstImage = images[0];
+    return (
+      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-700/50 flex items-center justify-center">
+        <img 
+          src={firstImage} 
+          alt="Product image" 
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // If image fails to load, hide the image
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
+        />
+      </div>
+    );
   };
 
   if (loading) {
