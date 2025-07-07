@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type {
-  Service,
-  ProductFormData,
-  CreateProductResponse,
-} from "../../../api/types.js";
+import type { Service, CreateProductResponse } from "../../../api/types.js";
 import { fetchServices } from "../../../api/services.js";
 import { createProduct } from "../../../api/products.js";
 import ProductForm from "./ProductForm.js";
@@ -26,14 +22,13 @@ interface Field {
 // Product types
 const PRODUCT_TYPES = ["Account", "Item", "Currency", "Service"];
 
-
 interface LocalProductFormState {
   title: string;
   type: string;
   description: string;
   service: string;
   serviceName: string;
-  productRequiredFields: any[];
+  productRequiredFields: any;
   images: File[];
 }
 
@@ -119,11 +114,16 @@ function CreateProduct() {
       data.append("description", formData.description);
       data.append("service", formData.service);
       data.append("serviceName", formData.serviceName);
-      data.append("productRequiredFields", JSON.stringify(productRequiredFields));
+      data.append(
+        "productRequiredFields",
+        JSON.stringify(productRequiredFields)
+      );
       formData.images.forEach((file) => {
         data.append("images", file);
       });
-      const response = (await createProduct(data)) as unknown as CreateProductResponse;
+      const response = (await createProduct(
+        data
+      )) as unknown as CreateProductResponse;
       if (response.success) {
         navigate("/admin");
       } else {
@@ -201,7 +201,9 @@ function CreateProduct() {
 
           <ImageUpload
             images={formData.images}
-            onImagesChange={(imgs) => setFormData((prev) => ({ ...prev, images: imgs }))}
+            onImagesChange={(imgs) =>
+              setFormData((prev: any) => ({ ...prev, images: imgs }))
+            }
             maxImages={5}
           />
 

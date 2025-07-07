@@ -24,13 +24,8 @@ import Adminchat from "./components/Chat/Adminchat";
 import Group from "./components/Chat/Group";
 import DM from "./components/Chat/DM";
 
-
 function App() {
-
-
-
-
-  return (  
+  return (
     <Routes>
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
@@ -168,19 +163,20 @@ function App() {
       </Route>
 
       <Route path="/buy/:offerId" element={<BuyCardComp />} />
-      <Route path="/orders" element={<Order/>}/>
-      <Route  path="/adminchat" element={<Adminchat />}/>
-      <Route path="/chat" element={
-        <ProtectedRoute routeName="chat">
-          <Chat/>
-        </ProtectedRoute>
-      }/>
-      
-      <Route path="/groupchat" element={<Group />}/>
-      <Route path="/DMs" element={<DM/>}/>
+      <Route path="/orders" element={<Order />} />
+      <Route path="/adminchat" element={<Adminchat />} />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute routeName="chat">
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
 
+      <Route path="/groupchat" element={<Group />} />
+      <Route path="/DMs" element={<DM otherUserId={""} socket={null} />} />
     </Routes>
-    
   );
 }
 

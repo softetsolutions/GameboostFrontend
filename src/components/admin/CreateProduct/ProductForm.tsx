@@ -1,19 +1,19 @@
-import type { ProductFormData } from "../../../api/types.js";
-import type { Service } from "../../../api/services.js";
+// import type { ProductFormData } from "../../../api/types.js";
+// import type { Service } from "../../../api/services.js";
 import CustomDropdown from "../../ui/CustomDropdown.js";
 
-interface ProductFormProps {
-  formData: ProductFormData;
-  services: Service[];
-  productTypes: string[];
-  onInputChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  onServiceChange: (value: string) => void;
-  onTypeChange: (value: string) => void;
-}
+// interface ProductFormProps {
+//   formData: ProductFormData;
+//   services: Service[];
+//   productTypes: string[];
+//   onInputChange: (
+//     e: React.ChangeEvent<
+//       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+//     >
+//   ) => void;
+//   onServiceChange: (value: string) => void;
+//   onTypeChange: (value: string) => void;
+// }
 
 function ProductForm({
   formData,
@@ -22,7 +22,7 @@ function ProductForm({
   onInputChange,
   onServiceChange,
   onTypeChange,
-}: ProductFormProps) {
+}: any) {
   return (
     <div className="space-y-4">
       {/* Title */}
@@ -56,7 +56,12 @@ function ProductForm({
         <CustomDropdown
           value={formData.serviceName}
           onChange={onServiceChange}
-          options={[...new Set(services.map((service) => service.name))]}
+          // options={[...new Set(services.map((service) => service.name))]}
+          options={
+            [
+              ...new Set(services.map((service: any) => service.name)),
+            ] as string[]
+          }
           placeholder="Select a service"
           required={true}
         />

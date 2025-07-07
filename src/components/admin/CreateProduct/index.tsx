@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { ProductFormData } from "../../../api/types.js";
+// import type { ProductFormData } from "../../../api/types.js";
 import { fetchServices, type Service } from "../../../api/services.js";
 import { createProduct } from "../../../api/products.js";
 import ProductForm from "./ProductForm.js";
@@ -27,7 +27,7 @@ function CreateProduct() {
   const [error, setError] = useState("");
   const [services, setServices] = useState<Service[]>([]);
 
-  const [formData, setFormData] = useState<ProductFormData>({
+  const [formData, setFormData] = useState<any>({
     title: "",
     type: "",
     description: "",
@@ -113,7 +113,7 @@ function CreateProduct() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       [name]: value,
     }));
@@ -121,7 +121,7 @@ function CreateProduct() {
 
   const handleServiceChange = (value: string) => {
     const service = services.find((s) => s.name === value);
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       service: service?._id || "",
       serviceName: value,
@@ -129,7 +129,7 @@ function CreateProduct() {
   };
 
   const handleTypeChange = (value: string) => {
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       type: value,
     }));
