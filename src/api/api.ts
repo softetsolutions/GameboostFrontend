@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "./config";
+import { handleUnauthorized } from "../utils/auth";
 
 export interface UserData {
   email: string;
@@ -28,6 +29,7 @@ export const signupUser = async (userData: UserData): Promise<AuthResponse> => {
     body: JSON.stringify(userData),
   });
 
+  if (res.status === 401) await handleUnauthorized();
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Signup failed");
   return data;
@@ -43,6 +45,7 @@ export const loginUser = async (
     credentials:"include",
   });
 
+  if (res.status === 401) await handleUnauthorized();
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Login failed");
   if (data.token) {
@@ -59,6 +62,7 @@ export const logoutUser = async (): Promise<{ success: boolean; message: string 
     credentials: "include",
   });
 
+  if (res.status === 401) await handleUnauthorized();
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Logout failed");
   return data;

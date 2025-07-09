@@ -1,12 +1,84 @@
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { getAuthInfo } from "../../utils/auth";
+import { API_BASE_URL } from "../../api/config";
+import { Socket } from "socket.io-client";
 
-export default function DM() {
+type Message = {
+  user: string;
+  text: string;
+  [key: string]: any;
+};
+
+interface DMProps {
+  otherUserId: string;
+  socket: Socket | null;
+}
+
+export default function DM({ otherUserId, socket }: DMProps) {
   const [showModal, setshowModal] = useState(false);
   const [showsidebar, setShowsidebar] = useState(false);
   const [showOnsm, setShowonsm] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  let userId = "";
+  try {
+    userId = getAuthInfo().userId;
+  } catch {
+    // handle unauthorized, redirect, etc.
+  }
 
   const isSmallScreen = () => window.innerWidth < 640;
+
+  // Fetch conversation history on mount
+  useEffect(() => {
+    if (!userId || !otherUserId) return;
+    fetch(
+      `${API_BASE_URL}/conversations/between/${userId}/${otherUserId}`,
+      {
+        credentials: "include",
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data && data.data.messages) {
+          setMessages(data.data.messages);
+        } else {
+          setMessages([]);
+        }
+      });
+  }, [userId, otherUserId]);
+
+  // Listen for incoming messages
+  useEffect(() => {
+    const handler = (msg: Message) => {
+      setMessages((prev) => [...prev, msg]);
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+    socket?.on("receiveMessage", handler);
+    return () => {
+      socket?.off("receiveMessage", handler);
+    };
+  }, [socket]);
+
+  // Send message
+  const sendMessage = () => {
+    if (!input.trim() || !userId || !otherUserId) return;
+    const msg = {
+      senderId: userId,
+      receiverId: otherUserId,
+      text: input,
+    };
+    socket?.emit("sendMessage", msg);
+    setMessages((prev) => [...prev, { user: "user1", text: input }]); // Optimistic update
+    setInput("");
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  if (!otherUserId) {
+    return <div className="p-4 text-red-500">No user selected for chat.</div>;
+  }
 
   return (
     <div className="flex">
@@ -84,15 +156,15 @@ export default function DM() {
                       <div>Admin</div>
                       <div>
                         <p>
-                          DON’T return the in-game items under any circumstances
+                          DON'T return the in-game items under any circumstances
                           after you have received it.
                         </p>
                         <p>
-                          DON’T purchase the product listing as a form of
+                          DON'T purchase the product listing as a form of
                           payment or as an exchange for other goods.
                         </p>
                         <p>
-                          DON’T take the risk by transacting outside of G2G as
+                          DON'T take the risk by transacting outside of G2G as
                           it is not covered by GamerProtect.
                         </p>
                         <p>Read more about trading safety guidelines.</p>
@@ -115,15 +187,15 @@ export default function DM() {
                       <div>Admin</div>
                       <div>
                         <p>
-                          DON’T return the in-game items under any circumstances
+                          DON'T return the in-game items under any circumstances
                           after you have received it.
                         </p>
                         <p>
-                          DON’T purchase the product listing as a form of
+                          DON'T purchase the product listing as a form of
                           payment or as an exchange for other goods.
                         </p>
                         <p>
-                          DON’T take the risk by transacting outside of G2G as
+                          DON'T take the risk by transacting outside of G2G as
                           it is not covered by GamerProtect.
                         </p>
                         <p>Read more about trading safety guidelines.</p>
@@ -146,15 +218,15 @@ export default function DM() {
                       <div>Admin</div>
                       <div>
                         <p>
-                          DON’T return the in-game items under any circumstances
+                          DON'T return the in-game items under any circumstances
                           after you have received it.
                         </p>
                         <p>
-                          DON’T purchase the product listing as a form of
+                          DON'T purchase the product listing as a form of
                           payment or as an exchange for other goods.
                         </p>
                         <p>
-                          DON’T take the risk by transacting outside of G2G as
+                          DON'T take the risk by transacting outside of G2G as
                           it is not covered by GamerProtect.
                         </p>
                         <p>Read more about trading safety guidelines.</p>
@@ -219,9 +291,12 @@ export default function DM() {
                   type="text"
                   placeholder="Type a message..."
                   className="flex-grow bg-transparent outline-none text-white placeholder-gray-400"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && sendMessage()}
                 />
                 {/* Send SVG */}
-                <button className="ml-2 hover:text-cyan-400 transition">
+                <button className="ml-2 hover:text-cyan-400 transition" onClick={sendMessage}>
                   <svg
                     className="w-5 h-5 fill-current text-white"
                     viewBox="0 0 24 24"
@@ -248,101 +323,40 @@ export default function DM() {
           </>
         ) : (
           <>
-            <div className="h-[350px] sm:h-[440px]  w-[500px] sm:w-[880px] overflow-y-auto">
-              <div className="mt-5 justify-center">
-                <div className=" flex sm:w-210 sm:h-50 w-100 h-60  ml-4 rounded-lg  bg-gradient-to-b from-blue-900/50 to-cyan-600 border border-cyan-600/50 text-white">
-                  <div className="h-10">
-                    <button
-                      className="flex ml-3 mt-5 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-2 py-2 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
-                      tabIndex={0}
+            {/* Messages Display Area */}
+            <div className="h-[350px] sm:h-[440px] w-[500px] sm:w-[880px] overflow-y-auto p-4">
+              {messages.length === 0 ? (
+                <div className="flex justify-center items-center h-full text-gray-400">
+                  No messages yet. Start the conversation!
+                </div>
+              ) : (
+                messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`mb-4 flex ${msg.user === "user1" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        msg.user === "user1"
+                          ? "bg-cyan-600 text-white"
+                          : "bg-gray-700 text-white"
+                      }`}
                     >
-                      <i className="fa-solid fa-circle-user text-xl"></i>
-                    </button>
-                  </div>
-                  <div className="flex flex-col text-left ml-2 mt-4">
-                    <div>Admin</div>
-                    <div>
-                      <p>
-                        DON’T return the in-game items under any circumstances
-                        after you have received it.
-                      </p>
-                      <p>
-                        DON’T purchase the product listing as a form of payment
-                        or as an exchange for other goods.
-                      </p>
-                      <p>
-                        DON’T take the risk by transacting outside of G2G as it
-                        is not covered by GamerProtect.
-                      </p>
-                      <p>Read more about trading safety guidelines.</p>
+                      <p className="text-sm">{msg.text}</p>
+                      {msg.timestamp && (
+                        <p className="text-xs opacity-70 mt-1">
+                          {new Date(msg.timestamp).toLocaleTimeString()}
+                        </p>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="mt-5 justify-center">
-                <div className=" flex sm:w-210 sm:h-50 w-100 h-60 ml-4 rounded-lg  bg-gradient-to-b from-blue-900/50 to-cyan-600 border border-cyan-600/50 text-white">
-                  <div className="h-10">
-                    <button
-                      className="flex ml-3 mt-5 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-2 py-2 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
-                      tabIndex={0}
-                    >
-                      <i className="fa-solid fa-circle-user text-xl"></i>
-                    </button>
-                  </div>
-                  <div className="flex flex-col text-left ml-2 mt-4">
-                    <div>Admin</div>
-                    <div>
-                      <p>
-                        DON’T return the in-game items under any circumstances
-                        after you have received it.
-                      </p>
-                      <p>
-                        DON’T purchase the product listing as a form of payment
-                        or as an exchange for other goods.
-                      </p>
-                      <p>
-                        DON’T take the risk by transacting outside of G2G as it
-                        is not covered by GamerProtect.
-                      </p>
-                      <p>Read more about trading safety guidelines.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 justify-center">
-                <div className=" flex sm:w-[840px] sm:h-50 w-100 h-60 ml-4 rounded-lg  bg-gradient-to-b from-blue-900/50 to-cyan-600 border border-cyan-600/50 text-white">
-                  <div className="h-10">
-                    <button
-                      className="flex ml-3 mt-5 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-2 py-2 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
-                      tabIndex={0}
-                    >
-                      <i className="fa-solid fa-circle-user text-xl"></i>
-                    </button>
-                  </div>
-                  <div className="flex flex-col text-left ml-2 mt-4">
-                    <div>Admin</div>
-                    <div>
-                      <p>
-                        DON’T return the in-game items under any circumstances
-                        after you have received it.
-                      </p>
-                      <p>
-                        DON’T purchase the product listing as a form of payment
-                        or as an exchange for other goods.
-                      </p>
-                      <p>
-                        DON’T take the risk by transacting outside of G2G as it
-                        is not covered by GamerProtect.
-                      </p>
-                      <p>Read more about trading safety guidelines.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
             </div>
-            <div className="w-[480px] sm:w-[840px] ml-4 p-4  border border-gray-600/90 bg-gray-700/50  shadow-md hover:shadow-cyan-500/25 text-white rounded-xl absolute bottom-2 ">
+            
+            {/* Message Input */}
+            <div className="w-[480px] sm:w-[840px] ml-4 p-4 border border-gray-600/90 bg-gray-700/50 shadow-md hover:shadow-cyan-500/25 text-white rounded-xl absolute bottom-2">
               {/* === Toolbar === */}
               <div className="flex items-center space-x-4 mb-2 text-gray-300">
                 <button className="hover:text-white">
@@ -360,9 +374,16 @@ export default function DM() {
                   type="text"
                   placeholder="Type a message..."
                   className="flex-grow bg-transparent outline-none text-white placeholder-gray-400"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && sendMessage()}
                 />
                 {/* Send SVG */}
-                <button className="ml-2 hover:text-cyan-400 transition">
+                <button 
+                  className="ml-2 hover:text-cyan-400 transition" 
+                  onClick={sendMessage}
+                  type="button"
+                >
                   <svg
                     className="w-5 h-5 fill-current text-white"
                     viewBox="0 0 24 24"

@@ -1,11 +1,13 @@
 import { API_BASE_URL } from "./config";
-import { getAuthInfo } from "../utils/auth";
+import { getAuthInfo, handleUnauthorized } from "../utils/auth";
 
 export interface Service {
   _id: string;
   name: string;
-  type?: string;
-  icon?: string;
+  icon: string;
+  showOnHome?: boolean;
+  createdAt: string;
+  __v: number;
 }
 
 export interface CreateServiceRequest {
@@ -22,6 +24,7 @@ export const fetchServices = async (): Promise<Service[]> => {
     },
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     throw new Error("Failed to fetch services");
   }
@@ -30,20 +33,32 @@ export const fetchServices = async (): Promise<Service[]> => {
   return Array.isArray(data) ? data : [];
 };
 
-export const createService = async (service: CreateServiceRequest): Promise<Service> => {
+export const createService = async (service: CreateServiceRequest | FormData): Promise<Service> => {
   try {
     const { token } = getAuthInfo();
 
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    let body: string | FormData;
+
+    if (service instanceof FormData) {
+      body = service;
+    } else {
+      // For JSON requests
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(service);
+    }
+
     const response = await fetch(`${API_BASE_URL}/services/create`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
       credentials: "include",
-      body: JSON.stringify(service),
+      body,
     });
 
+    if (response.status === 401) await handleUnauthorized();
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Service creation failed:", {
@@ -65,5 +80,111 @@ export const createService = async (service: CreateServiceRequest): Promise<Serv
   } catch (error) {
     console.error("Error creating service:", error);
     throw error;
+  }
+};
+
+export const fetchAllServices = async (): Promise<Service[]> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/services`, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    throw new Error("Failed to fetch services");
+  }
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
+};
+
+export const deleteService = async (serviceId: string): Promise<void> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    throw new Error("Failed to delete service");
+  }
+};
+
+export const updateServiceVisibility = async (serviceId: string, show: boolean): Promise<void> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/services/select`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ serviceId, show }),
+  });
+  if (response.status === 401) await handleUnauthorized();
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Failed to update visibility");
+  }
+};
+
+export const fetchServiceById = async (serviceId: string): Promise<Service> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    throw new Error("Failed to load service details");
+  }
+  return response.json();
+};
+
+export const updateService = async (serviceId: string, data: FormData): Promise<void> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+    body: data,
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: "Failed to update service" }));
+    throw new Error(errorData.message || "Failed to update service");
   }
 };

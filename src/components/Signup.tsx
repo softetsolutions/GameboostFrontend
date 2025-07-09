@@ -11,8 +11,8 @@ export default function Signup() {
   const [showPassword, setshowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -34,7 +34,8 @@ export default function Signup() {
 
     try {
       const userPayload = {
-        username: `${formData.firstname} ${formData.lastname}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       };
@@ -86,9 +87,9 @@ export default function Signup() {
                   </label>
                   <input
                     type="text"
-                    id="firstname"
-                    name="firstname"
-                    value={formData.firstname}
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
                     onChange={handleChange}
                     className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                     placeholder="First Name"
@@ -105,9 +106,9 @@ export default function Signup() {
                   </label>
                   <input
                     type="text"
-                    id="lastname"
-                    name="lastname"
-                    value={formData.lastname}
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
                     onChange={handleChange}
                     className="w-full p-3 bg-zinc-800  border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                     placeholder="Last Name"

@@ -1,9 +1,22 @@
 import { ArrowLeft, SearchIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Adminchat from "./Adminchat";
 import Group from "./Group";
 import DM from "./DM";
+import { io, Socket } from "socket.io-client";
+import { getAuthInfo } from "../../utils/auth";
+import { API_BASE_URL } from "../../api/config";
+
+const socketUrl = "http://localhost:5000";
+
+interface ConversationSummary {
+  userId: string;
+  displayName: string;
+  unreadCount: number;
+  lastMessage: string;
+  timestamp: string;
+}
 
 export default function Chat() {
   const [profile, setProfile] = useState(false);
@@ -13,13 +26,95 @@ export default function Chat() {
   const [showDMarrow, setShowDMarrow] = useState(false);
   const [activeChat, setactiveChat] = useState<string | null>(null);
   const [isOpen, setisOpen] = useState(false);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [selectedDMUserId, setSelectedDMUserId] = useState<string | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  
+  let userId = "";
+  try {
+    userId = getAuthInfo().userId;
+  } catch {
+    // eror
+  }
+  const isSmallScreen = () => window.innerWidth < 640;
 
-  const isSmallScreen = () => window.innerWidth < 640; 
+  // Initialize socket connection
+  useEffect(() => {
+    const newSocket = io(socketUrl, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+    });
 
+    // Add debug logging
+    newSocket.on('connect', () => {
+      console.log('Socket connected:', newSocket.id);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      console.log('Cleaning up socket connection');
+      newSocket.disconnect();
+    };
+  }, []);
+
+  // Fetch conversation list on mount
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`${API_BASE_URL}/conversations/user/${userId}`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setConversations(data.data);
+        } else {
+          setConversations([]);
+        }
+      });
+  }, [userId]);
+
+  // Join the user's room for socket.io
+  useEffect(() => {
+    if (!userId || !socket) return;
+    
+    socket.emit("join", userId);
+    socket.on("receiveMessage", (msg) => {
+      console.log("Received message:", msg);
+    });
+
+    return () => {
+      if (socket) {
+        socket.off("receiveMessage");
+      }
+    };
+  }, [userId, socket]);
+
+  // Handler for selecting a DM conversation
+  const handleSelectDM = (otherUserId: string) => {
+    setSelectedDMUserId(otherUserId);
+    setactiveChat("DM");
+    if (isSmallScreen()) setisOpen(true);
+  };
+
+  // Test function
+  const handleStartTestConversation = () => {
+    const testUserId = "6860c582141dedd08529b26c"; 
+    // replace with real test ID of a user 
+    setSelectedDMUserId(testUserId);
+    setactiveChat("DM");
+    if (isSmallScreen()) setisOpen(true);
+  };
 
   return (
-    <div className="flex  h-screen text-white justify-center  bg-gradient-to-b from-gray-800/60 to-gray-800/70 overflow-hidden">
-      <div className=" w-8 sm:w-10">
+    <div className="flex h-screen text-white justify-center bg-gradient-to-b from-gray-800/60 to-gray-800/70 overflow-hidden">
+      <div className="w-8 sm:w-10">
         <div className="px-1 py-1 mt-2 ml-1">
           <Link
             to="/"
@@ -29,23 +124,23 @@ export default function Chat() {
           </Link>
         </div>
       </div>
-      <div className=" w-[440px] sm:w-[450px] border border-gray-800/40  justify-center">
+      <div className="w-[440px] sm:w-[450px] border border-gray-800/40 justify-center">
         <div className="flex flex-col">
           <div className="flex">
             <div className="relative ml-auto mr-20">
               <button
                 onClick={() => setProfile(!profile)}
-                className="flex absolute  mt-3 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-3 py-3 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                className="flex absolute mt-3 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800 text-white font-semibold px-3 py-3 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
                 tabIndex={0}
               >
                 <i className="fa-solid fa-circle-user text-xl"></i>
               </button>
               {profile && (
-                <div className=" fixed inset-0 z-50 w-60 h-60 mt-16 ml-50 rounded-lg bg-gradient-to-b from-gray-800/70 to-gray-700/70 text-white backdrop-blur-sm border border-gray-700/50">
+                <div className="fixed inset-0 z-50 w-60 h-60 mt-16 ml-50 rounded-lg bg-gradient-to-b from-gray-800/70 to-gray-700/70 text-white backdrop-blur-sm border border-gray-700/50">
                   <div className="flex">
                     <div>
                       <button
-                        className="flex ml-3 mt-5 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800  text-white font-semibold px-2 py-2 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                        className="flex ml-3 mt-5 items-center bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800 text-white font-semibold px-2 py-2 rounded-3xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
                         tabIndex={0}
                       >
                         <i className="fa-solid fa-circle-user text-xl"></i>
@@ -60,7 +155,6 @@ export default function Chat() {
                   <div className="mt-4">
                     <hr className="text-cyan-300/50 text-1"></hr>
                   </div>
-
                   <div className="flex flex-col">
                     <button className="text-left ml-3 mt-3 w-50 p-1 hover:bg-gray-700/70 rounded-lg">
                       Chat setting
@@ -75,16 +169,14 @@ export default function Chat() {
                 </div>
               )}
             </div>
-
             <button
-              className="flex absolute  mt-3 ml-70 items-center bg-gradient-to-r from-gray-600/80 to-gray-700/90 hover:from-gray-600 hover:to-gray-700  text-white font-semibold px-3 py-3 rounded-3xl shadow-lg hover:shadow-gray-500/25 transition-all duration-300"
+              className="flex absolute mt-3 ml-70 items-center bg-gradient-to-r from-gray-600/80 to-gray-700/90 hover:from-gray-600 hover:to-gray-700 text-white font-semibold px-3 py-3 rounded-3xl shadow-lg hover:shadow-gray-500/25 transition-all duration-300"
               tabIndex={0}
             >
               <i className="fa-solid fa-bell text-xl"></i>
             </button>
           </div>
         </div>
-
         <div className="flex flex-col sm:flex-row justify-center gap-3 bg-white/12 backdrop-blur-md rounded-3xl p-2 mt-18 w-100 sm:w-100 ml-7 hover:bg-white/17 ">
           <div className="flex-1 relative ">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -99,6 +191,48 @@ export default function Chat() {
         </div>
         <div>
           <div className="flex flex-col mt-6">
+            {/* Test Chat Button */}
+            <div className="border border-gray-800/40 bg-gray-700/20 mt-2 p-1">
+              <div className="text-gray-300 font-bold mb-2 ml-2">Test Chat</div>
+              <button
+                onClick={handleStartTestConversation}
+                className="flex flex-row text-gray-200 p-3 rounded-lg transition w-full items-center mb-2 hover:bg-gray-700/40 bg-green-700/30"
+              >
+                <div className="flex items-center justify-center w-10 h-10 bg-green-600 rounded-full mr-3">
+                  <i className="fa-solid fa-user text-xl"></i>
+                </div>
+                <div className="flex flex-col flex-1 text-left">
+                  <span className="font-semibold">Test User</span>
+                  <span className="text-xs text-gray-400">Click to start test conversation</span>
+                </div>
+              </button>
+            </div>
+
+            {/* Conversation List */}
+            <div className="border border-gray-800/40 bg-gray-700/20 mt-2 p-1">
+              <div className="text-gray-300 font-bold mb-2 ml-2">Direct Messages</div>
+              {conversations.length === 0 && (
+                <div className="text-gray-400 ml-2">No conversations found.</div>
+              )}
+              {conversations.map((conv) => (
+                <button
+                  key={conv.userId}
+                  onClick={() => handleSelectDM(conv.userId)}
+                  className={`flex flex-row text-gray-200 p-3 rounded-lg transition w-full items-center mb-2 hover:bg-gray-700/40 ${selectedDMUserId === conv.userId ? "bg-gray-800/60" : ""}`}
+                >
+                  <div className="flex items-center justify-center w-10 h-10 bg-cyan-700 rounded-full mr-3">
+                    <i className="fa-solid fa-circle-user text-xl"></i>
+                  </div>
+                  <div className="flex flex-col flex-1 text-left">
+                    <span className="font-semibold">{conv.displayName}</span>
+                    <span className="text-xs text-gray-400 truncate">{conv.lastMessage}</span>
+                  </div>
+                  {conv.unreadCount > 0 && (
+                    <span className="ml-2 bg-cyan-500 text-white text-xs rounded-full px-2 py-1">{conv.unreadCount}</span>
+                  )}
+                </button>
+              ))}
+            </div>
             <div className="border border-gray-800/40 bg-gray-700/20 hover:bg-gray-700/40 mt-2 p-1">
               <button
                 onClick={() => {setactiveChat("Admin"); 
@@ -424,9 +558,7 @@ export default function Chat() {
           {activeChat === "Group1" && <Group />}
           {activeChat === "Group2" && <Group />}
           {activeChat === "Group3" && <Group />}
-          {activeChat === "DM1" && <DM />}
-          {activeChat === "DM2" && <DM />}
-          {activeChat === "DM3" && <DM />}
+          {activeChat === "DM" && selectedDMUserId && socket && <DM otherUserId={selectedDMUserId} socket={socket} />}
         </div>
       </div>
     </div>

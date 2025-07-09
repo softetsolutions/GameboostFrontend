@@ -10,6 +10,8 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import CreateProduct from "./components/admin/CreateProduct/CreateProduct";
 import CreateService from "./components/admin/CreateService";
+import RenderServiceOrServiceForm from "./components/admin/RenderServiceOrServiceForm";
+import RenderProductOrProductForm from "./components/admin/RenderProductOrProductForm";
 import CreateOffer from "./components/CreateOffer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Homepage from "./homepage/Homepage";
@@ -68,10 +70,26 @@ function App() {
           }
         />
         <Route
+          path="manageProducts"
+          element={
+            <ProtectedRoute routeName="manageProducts">
+              <RenderProductOrProductForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="createServices"
           element={
             <ProtectedRoute routeName="createServices">
               <CreateService />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="manageServices"
+          element={
+            <ProtectedRoute routeName="manageServices">
+              <RenderServiceOrServiceForm />
             </ProtectedRoute>
           }
         />
@@ -152,7 +170,11 @@ function App() {
       <Route path="/buy/:offerId" element={<BuyCardComp />} />
       <Route path="/orders" element={<Order/>}/>
       <Route  path="/adminchat" element={<Adminchat />}/>
-      <Route path="/chat" element={<Chat/>}/>
+      <Route path="/chat" element={
+        <ProtectedRoute routeName="chat">
+          <Chat/>
+        </ProtectedRoute>
+      }/>
       
       <Route path="/groupchat" element={<Group />}/>
       <Route path="/DMs" element={<DM/>}/>

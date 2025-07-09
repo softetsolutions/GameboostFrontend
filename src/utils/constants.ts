@@ -7,13 +7,17 @@ import {
   User,
   HelpCircle,
   FileText,
+  List,
+  Package,
 } from "lucide-react";
 
 export const routeMapping: { [key: string]: string } = {
   // Admin routes
   dashboard: "Dashboard",
   createProduct: "Create Product",
+  manageProducts: "Manage Products",
   createServices: "Create Services",
+  manageServices: "Manage Services",
 
   // User routes
   home: "Home",
@@ -32,7 +36,9 @@ export const iconMapping = (route: string): LucideIcon | null => {
     // Admin routes
     dashboard: Home,
     createProduct: Plus,
+    manageProducts: Package,
     createServices: Settings,
+    manageServices: List,
 
     // User routes
     home: Home,

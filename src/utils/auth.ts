@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { logoutUser } from "../api/api";
+import toast from "react-hot-toast";
 
 interface AuthTokenPayload {
   id: string;
@@ -40,5 +41,15 @@ export const isAuthenticated = (): boolean => {
     return true;
   } catch {
     return false;
+  }
+};
+
+export const handleUnauthorized = async (navigate?: (path: string) => void) => {
+  await logout();
+  toast.error("Session expired. Please login again.");
+  if (navigate) {
+    navigate("/login");
+  } else {
+    window.location.href = "/login";
   }
 };
