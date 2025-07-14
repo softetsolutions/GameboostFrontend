@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import {  otherSellers } from './dummyData.ts';
-import type { OtherSeller } from './dummyData.ts';
 import { useParams } from 'react-router-dom';
+import { otherSellers } from './dummyData.ts';
+import type { OtherSeller } from './dummyData.ts';
 import { fetchOfferById, type ApiOffer } from '../../api/offers';
 
 function BuyCardComp() {
@@ -13,44 +13,62 @@ function BuyCardComp() {
   const [, setLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
 
+  // Local Storage Logic inside useEffect
   useEffect(() => {
     if (offerId) {
       setLoading(true);
       setError(null);
       fetchOfferById(offerId)
-        .then(setOffer)
+        .then((fetchedOffer) => {
+          setOffer(fetchedOffer);
+
+          // Store in localStorage (max 15, no duplicates)
+          try {
+            const key = "browsing_history";
+            const existing: ApiOffer[] = JSON.parse(localStorage.getItem(key) || "[]");
+
+            // Remove duplicate if it exists
+            const withoutDuplicate = existing.filter(item => item._id !== fetchedOffer._id);
+
+            // Add new one at the top
+            const updated = [fetchedOffer, ...withoutDuplicate];
+
+            // Limit to latest 15
+            const limited = updated.slice(0, 15);
+
+            // Save
+            localStorage.setItem(key, JSON.stringify(limited));
+          } catch (err) {
+            console.error("Error saving browsing history:", err);
+          }
+        })
         .catch((err) => setError(err.message || 'Failed to fetch offer'))
         .finally(() => setLoading(false));
     }
   }, [offerId]);
 
   const handleInc = (): void => {
-    setCount(prevCount => prevCount + 1);
+    setCount((prev) => prev + 1);
   };
 
   const handleDec = (): void => {
-    setCount(prevCount => (prevCount > 1 ? prevCount - 1 : 1));
+    setCount((prev) => (prev > 1 ? prev - 1 : 1));
   };
 
-  // Calculate total amount
   const totalAmount: string = (count * (offer ? offer.price : 0)).toFixed(2);
 
-  // Filter and sort other sellers
-  const filteredSellers: OtherSeller[] = otherSellers.filter((seller: OtherSeller) =>
-    onlineSellersOnly ? seller.isOnline : true
-  ).sort((a: OtherSeller, b: OtherSeller) => {
-    if (sortBy === 'Lowest Price') {
-      return parseFloat(a.price) - parseFloat(b.price);
-    }
-    return 0;
-  });
+  const filteredSellers: OtherSeller[] = otherSellers
+    .filter((seller) => (onlineSellersOnly ? seller.isOnline : true))
+    .sort((a, b) => {
+      if (sortBy === 'Lowest Price') return parseFloat(a.price) - parseFloat(b.price);
+      return 0;
+    });
 
-  // Helper to get a field value from offerDetails
-  function getOfferDetail(field: string): string | undefined {
+  const getOfferDetail = (field: string): string | undefined => {
     if (!offer || !offer.offerDetails) return undefined;
     const found = offer.offerDetails.find((d) => d.fieldName === field);
     return found ? found.value : undefined;
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 pb-16 relative">

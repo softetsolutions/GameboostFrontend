@@ -23,23 +23,20 @@ import Chat from "./components/Chat/Chat";
 import Adminchat from "./components/Chat/Adminchat";
 import Group from "./components/Chat/Group";
 import DM from "./components/Chat/DM";
-
+import HeroSection from "./components/hero/Hero";
+import SellerRequest from "./components/admin/SellerRequest";
 
 function App() {
 
+  return (
 
+    <Routes >
+      <Route path="/" element={<Homepage />}>
 
-
-  return (  
-    <Routes>
-      <Route path="/" element={<Homepage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/setting" element={<Setting />} />
-      <Route path="/account" element={<Account />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/verification" element={<Verification />} />
-      <Route path="/product" element={<ProductPageComp />} />
+        <Route index element={<HeroSection />} />
+        <Route path="/product" element={<ProductPageComp />} />
+        <Route path="/buy/:offerId" element={<BuyCardComp />} />
+      </Route>
       <Route
         path="/language"
         element={
@@ -50,6 +47,12 @@ function App() {
           />
         }
       />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/setting" element={<Setting />} />
+      <Route path="/account" element={<Account />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/verification" element={<Verification />} />
 
       {/* Admin Routes*/}
       <Route
@@ -101,7 +104,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="sellerRequest"
+          element={
+            <ProtectedRoute routeName="sellerRequest">
+              <SellerRequest />
+            </ProtectedRoute>
+          }
+        />
+
       </Route>
+
 
       {/* Seller Routes*/}
       <Route
@@ -167,20 +180,20 @@ function App() {
         />
       </Route>
 
-      <Route path="/buy/:offerId" element={<BuyCardComp />} />
-      <Route path="/orders" element={<Order/>}/>
-      <Route  path="/adminchat" element={<Adminchat />}/>
+
+      <Route path="/orders" element={<Order />} />
+      <Route path="/adminchat" element={<Adminchat />} />
       <Route path="/chat" element={
         <ProtectedRoute routeName="chat">
-          <Chat/>
+          <Chat />
         </ProtectedRoute>
-      }/>
-      
-      <Route path="/groupchat" element={<Group />}/>
-      <Route path="/DMs" element={<DM/>}/>
+      } />
+
+      <Route path="/groupchat" element={<Group />} />
+      <Route path="/DMs" element={<DM />} />
 
     </Routes>
-    
+
   );
 }
 

@@ -11,6 +11,8 @@ import ArrowRight from "../../assets/svgIcons/ArrowRight.svg?react";
 import { fetchHomePageData } from "../../api/products";
 import type { HomePageService } from "../../api/products";
 import DynamicPopularSection from "../DynamicPopularSection";
+import SearchBar from "../SearchBar";
+import BrowsingHistory from "../BrowsingHistory";
 
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -107,28 +109,7 @@ const HeroSection = () => {
           </h1>
 
           {/* Search */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <div className="flex flex-col sm:flex-row gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-2">
-              <div className="flex-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <SearchIcon className="w-5 h-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search games, services, accounts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-white placeholder-gray-300 pl-12 pr-6 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-              <button
-                onClick={handleSearch}
-                className="bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Search
-              </button>
-            </div>
-          </div>
+          <SearchBar/>
 
           {/* Service Cards */}
           <div className="relative max-w-7xl mx-auto mb-24 py-4">
@@ -179,6 +160,8 @@ const HeroSection = () => {
               )}
             </div>
           </div>
+
+          <BrowsingHistory/>
 
           {/* Dynamic Popular Sections */}
           <div className="mt-20">
