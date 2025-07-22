@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { fetchProductAndServiceDetailBySearch } from '../api/searchProduct';
 import { Search as SearchIcon } from 'lucide-react';
+import { fetchServices } from '../api/services';
 
 let debounceTimer: ReturnType<typeof setTimeout>;
 
@@ -13,6 +14,12 @@ const SearchBar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(()=>{
+    fetchServices()
+    .then(data=>console.log(data))
+    .catch(err=>console.log(err))
+  })
 
   // Close dropdown when clicked outside
   useEffect(() => {

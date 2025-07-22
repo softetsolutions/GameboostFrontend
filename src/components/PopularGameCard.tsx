@@ -28,7 +28,7 @@ const PopularGameCard = ({ image, title, offerCount, onClick }: PopularGameCardP
         {/* Glow Effect */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-cyan-500/10 to-transparent pointer-events-none" />
         {/* Title */}
-        <div className="absolute bottom-0 left-0 w-full bg-black/70 text-white text-center text-sm font-semibold py-2 px-2 truncate">
+        <div className="absolute bottom-0 left-0 w-full text-shadow-lg text-white text-center text-sm font-bold py-2 px-2 truncate">
           {title}
         </div>
       </div>
