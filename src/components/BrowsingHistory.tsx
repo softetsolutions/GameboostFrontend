@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ApiOffer } from '../api/offers';
+import fallbackImg from "../assets/images/fallback-imgjpg.jpg"
 
 function BrowsingHistory() {
   const [history, setHistory] = useState<ApiOffer[]>([]);
@@ -57,7 +58,7 @@ function BrowsingHistory() {
               </button>
 
               <img
-                src={offer.images?.[0] || ''}
+                src={offer.images?.[0] || fallbackImg}
                 alt={offer.product?.title || 'Offer'}
                 className="w-full h-24 object-cover rounded-t-lg text-white"
               />

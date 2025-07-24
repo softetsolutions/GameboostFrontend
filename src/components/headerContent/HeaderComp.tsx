@@ -72,9 +72,11 @@ const Navbar = () => {
         >
           <div className="flex items-center justify-between">
             {/* Logo  */}
+            <Link to="/">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-r from-cyan-500 to-blue-700 p-2 rounded-xl">
                 <LogoIcon className="w-8 h-8 text-white" />
+                {/* <LogoIcon className="w-8 h-8 text-white" /> */}
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
@@ -83,6 +85,7 @@ const Navbar = () => {
                 <p className="text-xs text-gray-400">Pro Gaming Services</p>
               </div>
             </div>
+            </Link>
 
             {/* Desktop Menu */}
             {/* <div className="hidden md:flex items-center space-x-8">

@@ -8,17 +8,18 @@ import ServiceCard from "../ServiceCard";
 // import SearchIcon from "../../assets/svgIcons/SearchIcon.svg?react";
 import ArrowLeft from "../../assets/svgIcons/ArrowLeft.svg?react";
 import ArrowRight from "../../assets/svgIcons/ArrowRight.svg?react";
-// import { fetchHomePageData } from "../../api/products";
-// import type { HomePageService } from "../../api/products";
-// import DynamicPopularSection from "../DynamicPopularSection";
+import { fetchHomePageData } from "../../api/products";
+import type { HomePageService } from "../../api/products";
+import DynamicPopularSection from "../DynamicPopularSection";
 import SearchBar from "../SearchBar";
 import BrowsingHistory from "../BrowsingHistory";
-import TrendingServices from "../TrendingServices";
+// import TrendingServices from "../TrendingServices";
+// import { fetchAllProducts } from "../../api/products";
 
 const HeroSection = () => {
-  // const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
-  // const [popularSections, setPopularSections] = useState<HomePageService[]>([]);
+  const [popularSections, setPopularSections] = useState<HomePageService[]>([]);
 
   // Services
   const serviceCards = [
@@ -53,16 +54,16 @@ const HeroSection = () => {
     },
   ];
 
-  // useEffect(() => {
-  //   fetchHomePageData()
-  //     .then((services: HomePageService[]) => {
-  //       setPopularSections(services);
-  //     })
-  //     .catch(() => setPopularSections([]));
-  // }, []);
+  useEffect(() => {
+    fetchHomePageData()
+      .then((services: HomePageService[]) => {
+        setPopularSections(services);
+      })
+      .catch(() => setPopularSections([]));
+  }, []);
 
-  // const handleSearch = () => {
-  // };
+  const handleSearch = () => {
+  };
   const nextSlide = () => {
     setCurrentSlide((prev) => {
       const maxSlides = Math.ceil(serviceCards.length / 3) - 1;
@@ -110,7 +111,7 @@ const HeroSection = () => {
           </h1>
 
           {/* Search */}
-          <SearchBar/>
+          <SearchBar />
 
           {/* Service Cards */}
           <div className="relative max-w-7xl mx-auto mb-24 py-4">
@@ -151,21 +152,20 @@ const HeroSection = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index * 3)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      currentSlide === index * 3
+                    className={`h-2 rounded-full transition-all duration-300 ${currentSlide === index * 3
                         ? "bg-gradient-to-r from-cyan-500 to-blue-700 w-8"
                         : "bg-gray-500 w-2 hover:bg-gray-400"
-                    }`}
+                      }`}
                   />
                 )
               )}
             </div>
           </div>
 
-          <BrowsingHistory/>
+          <BrowsingHistory />
 
           {/* Dynamic Popular Sections */}
-          {/* <div className="mt-20">
+          <div className="mt-20">
             {popularSections.map(section => (
               <DynamicPopularSection
                 key={section._id}
@@ -173,8 +173,8 @@ const HeroSection = () => {
                 products={section.products.map(product => ({ ...product, service: section._id }))}
               />
             ))}
-          </div> */}
-          <TrendingServices/>
+          </div>
+          {/* <TrendingServices/> */}
         </div>
       </div>
     </section>

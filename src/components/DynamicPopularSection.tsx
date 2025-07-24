@@ -37,6 +37,7 @@ const DynamicPopularSection = ({ title, products }: DynamicPopularSectionProps) 
         throw new Error("Service ID not found for product");
       }
       navigate(`/product?productId=${product._id}&serviceId=${product.service}`, { state: { serviceName: title } });
+      
     } catch (error) {
       console.error("Error navigating to product page:", error);
       toast.error("Failed to load product offers");

@@ -8,6 +8,7 @@ let debounceTimer: ReturnType<typeof setTimeout>;
 const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedService, setSelectedService] = useState('All services');
+  const [services, setServices] = useState<{ _id: string; name: string }[]>([]);
   const [results, setResults] = useState<
     { productName: string; services: { id: string; servicename: string }[] }[]
   >([]);
@@ -15,13 +16,16 @@ const SearchBar = () => {
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(()=>{
+  //  Fetch services on mount
+  useEffect(() => {
     fetchServices()
-    .then(data=>console.log(data))
-    .catch(err=>console.log(err))
+      .then(data => {
+        setServices(data)        
   })
+      .catch(err => console.log(err));
+  }, []);
 
-  // Close dropdown when clicked outside
+  //  Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -35,7 +39,6 @@ const SearchBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
@@ -46,7 +49,6 @@ const SearchBar = () => {
     }, 600);
   };
 
-  // Trigger search when selectedService changes
   useEffect(() => {
     if (searchQuery.trim()) {
       clearTimeout(debounceTimer);
@@ -56,7 +58,6 @@ const SearchBar = () => {
     }
   }, [selectedService]);
 
-  // Fetch logic (with optional custom input string)
   const handleSearch = async (query?: string) => {
     const searchTerm = (query ?? searchQuery).trim();
     if (!searchTerm) return;
@@ -97,15 +98,24 @@ const SearchBar = () => {
           onChange={handleInputChange}
         />
 
+        {/*  Dynamic Services Dropdown */}
         <select
           className="bg-transparent text-sm text-white px-3 py-2 outline-none border-none focus:ring-0 cursor-pointer"
           value={selectedService}
           onChange={(e) => setSelectedService(e.target.value)}
         >
-          <option className='bg-black text-white'>All services</option>
-          <option className='bg-black text-white'>Account</option>
-          <option className='bg-black text-white'>Gift Card</option>
-          <option className='bg-black text-white'>CS2 Boosting</option>
+          <option className="bg-black text-white" value="All services">
+            All services
+          </option>
+          {services.map(service => (
+            <option
+              key={service._id}
+              value={service.name}
+              className="bg-black text-white"
+            >
+              {service.name}
+            </option>
+          ))}
         </select>
 
         <button
@@ -126,41 +136,7 @@ const SearchBar = () => {
         </button>
       </div>
 
-      {/* Dropdown Panel */}
-      {/* {dropdownOpen && results.length > 0 && (
-        <div className="absolute z-50 w-full bg-zinc-900/90 border border-white/10 backdrop-blur-md rounded-xl shadow-lg max-h-96 overflow-y-auto mt-2">
-          {loading ? (
-            <div className="p-4 text-gray-400">Loading...</div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
-              {results.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex flex-col bg-white/5 hover:bg-white/10 transition p-3 rounded-lg"
-                >
-                  <p
-                    className="font-semibold text-sm text-white truncate"
-                    title={item.productName}
-                  >
-                    {item.productName}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {item.services.map((service, sIdx) => (
-                      <span
-                        key={sIdx}
-                        className="text-xs bg-cyan-700/80 text-white px-3 py-1 rounded-full truncate"
-                        title={service.servicename}
-                      >
-                        {service.servicename}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )} */}
+      {/* Dropdown Results */}
       {dropdownOpen && (
         <div className="absolute z-50 w-full bg-zinc-900/90 border border-white/10 backdrop-blur-md rounded-xl shadow-lg max-h-96 overflow-y-auto mt-2">
           {loading ? (
@@ -197,7 +173,6 @@ const SearchBar = () => {
           ) : null}
         </div>
       )}
-
     </div>
   );
 };
