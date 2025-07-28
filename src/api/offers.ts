@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "./config";
-import { getAuthInfo, handleUnauthorized } from "../utils/auth";
+import { getAuthInfo } from "../utils/auth";
 
 export interface OfferFormData {
   brand: string; //productId
@@ -12,49 +12,52 @@ export interface OfferFormData {
   images: string[];
 }
 
-export interface ApiOffer {
+export type ApiOffer = {
   _id: string;
-  product: {
-    _id: string;
-    title: string;
-    type: string;
-    service: { _id: string; name: string } | string;
-  };
-  seller: {
-    _id: string;
-    displayName?: string;
-    username?: string;
-  };
-  offerDetails: Array<{ fieldName: string; value: any }>;
   price: number;
   currency: string;
   quantityAvailable: number;
-  deliveryTime: string;
-  instantDelivery: boolean;
-  status: string;
-  images: string[];
-  createdAt: string;
-}
+  images?: string[];
+  product: {
+    _id: string;
+    title: string;
+    service: string;
+  };
+};
 
-export const createOffer = async (offerData: FormData): Promise<ApiOffer> => {
-  let seller: string;
-  try {
-    const auth = getAuthInfo();
-    seller = auth.userId;
-  } catch {
-    await handleUnauthorized();
-    throw new Error("No authentication token found");
-  }
+export type ServiceWithCount = {
+  _id: string;
+  name: string;
+  offerCount: number;
+  icon?: string;
+};
 
-  offerData.append("seller", seller);
+export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> => {
+  const { userId: seller } = getAuthInfo();
+
+  const payload = {
+    product: offerData.brand,
+    offerDetails: Object.entries(offerData.dynamicFields).map(
+      ([fieldName, value]) => ({ fieldName, value })
+    ),
+    price: offerData.price,
+    currency: offerData.currency,
+    quantityAvailable: offerData.quantityAvailable,
+    deliveryTime: offerData.deliveryTime,
+    instantDelivery: offerData.instantDelivery,
+    images: offerData.images,
+    seller,
+  };
 
   const response = await fetch(`${API_BASE_URL}/offers`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     credentials: "include",
-    body: offerData,
+    body: JSON.stringify(payload),
   });
 
-  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -66,12 +69,6 @@ export const createOffer = async (offerData: FormData): Promise<ApiOffer> => {
 };
 
 export const fetchOffers = async (): Promise<ApiOffer[]> => {
-  try {
-    getAuthInfo();
-  } catch {
-    await handleUnauthorized();
-    throw new Error("No authentication token found");
-  }
 
   const response = await fetch(`${API_BASE_URL}/offers`, {
     method: "GET",
@@ -81,7 +78,6 @@ export const fetchOffers = async (): Promise<ApiOffer[]> => {
     credentials: "include",
   });
 
-  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -102,12 +98,6 @@ export const fetchOffers = async (): Promise<ApiOffer[]> => {
 };
 
 export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
-  try {
-    getAuthInfo();
-  } catch {
-    await handleUnauthorized();
-    throw new Error("No authentication token found");
-  }
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: "GET",
@@ -117,7 +107,6 @@ export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
     credentials: "include",
   });
 
-  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -132,23 +121,29 @@ export const fetchOfferById = async (offerId: string): Promise<ApiOffer> => {
   throw new Error("Invalid response format for fetching an offer.");
 };
 
-export const updateOffer = async (offerId: string, offerData: FormData): Promise<ApiOffer> => {
-  try {
-    getAuthInfo();
-  } catch {
-    await handleUnauthorized();
-    throw new Error("No authentication token found");
-  }
+export const updateOffer = async (offerId: string, offerData: OfferFormData): Promise<ApiOffer> => {
+  const payload = {
+    product: offerData.brand,
+    offerDetails: Object.entries(offerData.dynamicFields).map(
+      ([fieldName, value]) => ({ fieldName, value })
+    ),
+    price: offerData.price,
+    currency: offerData.currency,
+    quantityAvailable: offerData.quantityAvailable,
+    deliveryTime: offerData.deliveryTime,
+    instantDelivery: offerData.instantDelivery,
+    images: offerData.images,
+  };
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: "PUT",
     headers: {
+      "Content-Type": "application/json",
     },
     credentials: "include",
-    body: offerData,
+    body: JSON.stringify(payload),
   });
 
-  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -157,15 +152,9 @@ export const updateOffer = async (offerId: string, offerData: FormData): Promise
   }
 
   return response.json();
-};
+}; 
 
 export const deleteOffer = async (offerId: string): Promise<{ message: string }> => {
-  try {
-    getAuthInfo();
-  } catch {
-    await handleUnauthorized();
-    throw new Error("No authentication token found");
-  }
 
   const response = await fetch(`${API_BASE_URL}/offers/${offerId}`, {
     method: 'DELETE',
@@ -175,7 +164,6 @@ export const deleteOffer = async (offerId: string): Promise<{ message: string }>
     credentials: 'include',
   });
 
-  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     const errorData = await response
       .json()
@@ -187,12 +175,6 @@ export const deleteOffer = async (offerId: string): Promise<{ message: string }>
 }; 
 
 export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
-  try {
-    getAuthInfo();
-  } catch {
-    await handleUnauthorized();
-    throw new Error("No authentication token found");
-  }
   const { userId } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/offers/seller/${userId}`, {
@@ -203,7 +185,6 @@ export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
     credentials: "include",
   });
 
-  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     throw new Error("Failed to fetch offers");
   }
@@ -215,35 +196,10 @@ export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
   throw new Error("Invalid response format from server");
 }; 
 
-// export const fetchOffersByProductAndService = async (productId: string, serviceId: string): Promise<ApiOffer[]> => {
-
-//   const response = await fetch(`${API_BASE_URL}/offers/filter?productId=${productId}&serviceId=${serviceId}`, {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     credentials: "include",
-//   });
-
-//   if (!response.ok) {
-//     const errorData = await response
-//       .json()
-//       .catch(() => ({ message: `Failed to fetch offers: ${response.status}` }));
-//     throw new Error(errorData.message || "Failed to fetch offers");
-//   }
-
-//   const result = await response.json();
-//   if (result.success && Array.isArray(result.data)) {
-//     return result.data;
-//   }
-//   throw new Error("Invalid response format from server");
-// }; 
-
-
 export const fetchOffersByProductAndService = async (
   productId: string,
   serviceId: string
-): Promise<ApiOffer[]> => {
+): Promise<{ offers: ApiOffer[]; services: ServiceWithCount[] }> => {
   const response = await fetch(
     `${API_BASE_URL}/offers/filter?productId=${productId}&serviceId=${serviceId}`,
     {
@@ -263,8 +219,47 @@ export const fetchOffersByProductAndService = async (
   }
 
   const result = await response.json();
+
+
   if (result.success && Array.isArray(result.offers)) {
-    return result.offers;
+    return {
+      offers: result.offers,
+      services: result.services,
+ 
+    };
   }
+
   throw new Error("Invalid response format from server");
+};
+export const fetchOffersByServiceId = async (
+  serviceId: string,
+  page: number = 1,
+  limit: number = 10
+) => {
+
+  const { token } = getAuthInfo();
+  try {
+
+    
+    const response = await fetch(
+      `${API_BASE_URL}/offers/service/${serviceId}?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch offers by serviceId");
+    }
+
+    return await response.json(); // { success, data: offers, pagination }
+  } catch (error) {
+    console.error("API error (fetchOffersByServiceId):", error);
+    throw error;
+  }
 };
