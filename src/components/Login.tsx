@@ -1,4 +1,5 @@
 import { useState } from "react";
+<<<<<<< HEAD
 import { useNavigate , Link} from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import {Eye, ArrowLeft} from "lucide-react";
@@ -34,6 +35,78 @@ export default function Login(){
 
     }
   }
+=======
+import { useNavigate, Link } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Eye, ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
+import Navbar from "../components/headerContent/HeaderComp";
+import { loginUser } from "../api/api";
+import { getAuthInfo } from "../utils/auth";
+
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setpassword] = useState("");
+  const navigate = useNavigate();
+  const [showPassword, setshowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [captcha , setCaptcha] = useState(null);
+
+  const handleLogin = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    //   if(!captcha){
+    //  alert("Please verify reCaptacha");
+    //   return;
+    // }//
+
+    try {
+      const response = await loginUser({ email, password });
+      if (response.token) {
+     
+        // Token is automatically stored by loginUser function
+        // Get user role and redirect accordingly using centralized auth function
+        try {
+          const { role } = getAuthInfo();
+
+          // Show success toast
+          toast.success(`Welcome back! Logging you in as ${role}...`);
+
+          // Redirect based on user role
+          switch (role) {
+            case "admin":
+              navigate("/admin");
+              break;
+            case "seller":
+              navigate("/seller");
+              break;
+            case "user":
+              navigate("/user");
+              break;
+            default:
+              navigate("/user"); 
+          }
+        } catch (error) {
+          console.error("Error getting auth info:", error);
+          toast.error(
+            "Login successful but there was an issue with your role"
+          );
+          navigate("/user");
+        }
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Login failed. Please check your credentials and try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+>>>>>>> master
 
   const spinner = (
     <svg
@@ -99,8 +172,11 @@ export default function Login(){
     },
   ];
 
+<<<<<<< HEAD
   
   
+=======
+>>>>>>> master
   const [socialLoginLoading] = useState({
     google: false,
     facebook: false,
@@ -108,6 +184,7 @@ export default function Login(){
   });
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex flex-col">
       <Navbar/>
 
@@ -148,11 +225,56 @@ export default function Login(){
                   Password{" "}
                 </label>
                   <a
+=======
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      <Navbar />
+
+      <div className="flex-grow flex items-center justify-center min-h-screen bg-black px-4 py-30">
+        <div className="w-full max-w-md">
+          <div className="border border-zinc-800 rounded-2xl  bg-zinc-900 overflow-hidden shadow-lg ">
+            <div className="h-2 bg-gradient-to-r from-blue-100 to-cyan-500"></div>
+            <div className="p-8">
+              <Link
+                to="/"
+                className="inline-flex items-center text-center text-sm text-gray-400 hover:text-blue-400 mb-6"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Back to homepage
+              </Link>
+              <h1 className="flex text-2xl font-bold md-6 text-white justify-center">
+                Login
+              </h1>
+
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    {" "}
+                    Email{" "}
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-3 bg-zinc-800 border border-zinc-700 placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500  focus:border-transparent"
+                    required
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-sm font-medium text-gray-300 ">
+                      {" "}
+                      Password{" "}
+                    </label>
+                    <a
+>>>>>>> master
                       href="/forgot-password"
                       className="text-xs text-blue-400 hover:underline"
                     >
                       Forgot Password?
                     </a>
+<<<<<<< HEAD
                    </div>
 
                 <div className="relative">
@@ -235,13 +357,132 @@ export default function Login(){
                   Sign up
                 </button>
                 </Link>
+=======
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setpassword(e.target.value)}
+                      className="w-full p-3 bg-zinc-800 border border-zinc-700 placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500  focus:border-transparent"
+                      required
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-cyan-400"
+                      onClick={() => setshowPassword(!showPassword)}
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex text-center">
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    required
+                    className="w-4 h-4 accent-blue-400 rounded focus:ring-cyan-500"
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="ml-2 text-sm text-gray-300"
+                  >
+                    Remember me
+                  </label>
+                </div>
+                <div className="flex justify-center">
+                  <ReCAPTCHA sitekey="YOUR_RECAPTCHA_SITE_KEY" theme="dark" />
+                </div>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-blue-300 text-black py-3 font-medium rounded-lg hover:bg-cyan-400 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Signing In...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </button>
+                </div>
+              </form>
+              <div className="mt-8">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-zinc-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-zinc-900 text-gray-400">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  {socialProviders.map(({ name, icon }) => (
+                    <button
+                      key={name}
+                      className="w-full flex items-center justify-center p-3 bg-zinc-800 rounded-lg border border-zinc-700 hover:cursor-pointer  hover:bg-zinc-700 transition-all"
+                    >
+                      {socialLoginLoading[
+                        name as keyof typeof socialLoginLoading
+                      ]
+                        ? spinner
+                        : icon}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-8 text-center text-sm text-gray-400">
+                  Don't have an account?{" "}
+                  <Link to="/signup">
+                    <button
+                      onClick={() => navigate("/signup")}
+                      className="font-medium text-blue-400 hover:underline hover:cursor-pointer"
+                    >
+                      Sign up
+                    </button>
+                  </Link>
+                </div>
+>>>>>>> master
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+<<<<<<< HEAD
     <Footer/>
     </div>
   );
 };
+=======
+  );
+}
+>>>>>>> master

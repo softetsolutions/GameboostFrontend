@@ -11,10 +11,18 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.8",
+<<<<<<< HEAD
+=======
+    "jwt-decode": "^4.0.0",
+>>>>>>> master
     "lucide-react": "^0.513.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-google-recaptcha": "^3.1.0",
+<<<<<<< HEAD
+=======
+    "react-hot-toast": "^2.5.2",
+>>>>>>> master
     "react-router-dom": "^7.6.2"
   },
   "devDependencies": {

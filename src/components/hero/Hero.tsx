@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 import { useState, useRef } from "react";
+=======
+import { useState, useEffect } from "react";
+>>>>>>> master
 import BoostingIcon from "../../assets/svgIcons/boostingArrow.svg?react";
 import UserIcon from "../../assets/svgIcons/userIcon.svg?react";
 import CurrencyIcon from "../../assets/svgIcons/currencyIcon.svg?react";
 import CoachIcon from "../../assets/svgIcons/coachIcon.svg?react";
 import TournamentIcon from "../../assets/svgIcons/tournamentIcon.svg?react";
 import ServiceCard from "../ServiceCard";
+<<<<<<< HEAD
 import PopularGameCard from "../PopularGameCard"
 import SearchIcon from "../../assets/svgIcons/SearchIcon.svg?react";
 import ArrowLeft from "../../assets/svgIcons/ArrowLeft.svg?react";
@@ -21,11 +26,26 @@ import freefireImg from "../../assets/images/freefire.avif";
 import minecraftImg from "../../assets/images/minecraft.jpg";
 import pokemonImg from "../../assets/images/pokemon.jpg";
 import rocketImg from "../../assets/images/rocket.jpg";
+=======
+import SearchIcon from "../../assets/svgIcons/SearchIcon.svg?react";
+import ArrowLeft from "../../assets/svgIcons/ArrowLeft.svg?react";
+import ArrowRight from "../../assets/svgIcons/ArrowRight.svg?react";
+import { fetchHomePageData } from "../../api/products";
+import type { HomePageService } from "../../api/products";
+import DynamicPopularSection from "../DynamicPopularSection";
+>>>>>>> master
 
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
+<<<<<<< HEAD
   const gamesContainerRef = useRef<HTMLDivElement>(null);
+=======
+  const [smcurrentSlide, setSMCurrentSlide] = useState(0);
+  const [popularSections, setPopularSections] = useState<HomePageService[]>([]);
+
+  const isSmallScreen = () => window.innerWidth < 640;
+>>>>>>> master
 
   // Services
   const serviceCards = [
@@ -59,6 +79,7 @@ const HeroSection = () => {
       icon: <TournamentIcon className="w-8 h-8 text-white" />,
     },
   ];
+<<<<<<< HEAD
   const popularGames = [
     {
       name: "Fortnite",
@@ -113,6 +134,18 @@ const HeroSection = () => {
   const handleGameClick = (gameName: string) => {
     console.log("Selected game:", gameName)
   }
+=======
+
+  useEffect(() => {
+    fetchHomePageData()
+      .then((services: HomePageService[]) => {
+        setPopularSections(services);
+      })
+      .catch(() => setPopularSections([]));
+  }, []);
+
+  const handleSearch = () => {};
+>>>>>>> master
   const nextSlide = () => {
     setCurrentSlide((prev) => {
       const maxSlides = Math.ceil(serviceCards.length / 3) - 1;
@@ -126,6 +159,7 @@ const HeroSection = () => {
       return prev <= 0 ? maxSlides * 3 : prev - 3;
     });
   };
+<<<<<<< HEAD
 
   // Calculate visible cards 
   const visibleCards = serviceCards.slice(currentSlide, currentSlide + 3);
@@ -145,6 +179,26 @@ const HeroSection = () => {
     }
   };
 
+=======
+  const smnextSlide = () => {
+    setSMCurrentSlide((prev) => {
+      const maxSlides = serviceCards.length-1 ;
+      return prev >= maxSlides ? 0 : prev + 1;
+    });
+  };
+
+  const smprevSlide = () => {
+    setSMCurrentSlide((prev) => {
+      const maxSlides = serviceCards.length-1 ;
+      return prev <= 0 ? maxSlides : prev - 1;
+    });
+  };
+
+  // Calculate visible cards
+  const visibleCards = serviceCards.slice(currentSlide, currentSlide + 3);
+  const smvisibleCards = serviceCards.slice(smcurrentSlide, smcurrentSlide + 1);
+
+>>>>>>> master
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 relative overflow-hidden">
       {/* Gaming Background */}
@@ -200,6 +254,7 @@ const HeroSection = () => {
 
           {/* Service Cards */}
           <div className="relative max-w-7xl mx-auto mb-24 py-4">
+<<<<<<< HEAD
             <button
               onClick={prevSlide}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 shadow-xl backdrop-blur-sm border border-cyan-500/50 transition-all duration-300 hover:scale-110 hover:cursor-pointer"
@@ -228,10 +283,78 @@ const HeroSection = () => {
                   />
                 ))}
               </div>
+=======
+            {isSmallScreen() ? (
+              <>
+                <button
+                  onClick={smprevSlide}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 shadow-xl backdrop-blur-sm border border-cyan-500/50 transition-all duration-300 hover:scale-110 hover:cursor-pointer"
+                  aria-label="Previous services"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={smnextSlide}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 shadow-xl backdrop-blur-sm border border-cyan-500/50 transition-all duration-300 hover:scale-110 hover:cursor-pointer"
+                  aria-label="Next services"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 shadow-xl backdrop-blur-sm border border-cyan-500/50 transition-all duration-300 hover:scale-110 hover:cursor-pointer"
+                  aria-label="Previous services"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 shadow-xl backdrop-blur-sm border border-cyan-500/50 transition-all duration-300 hover:scale-110 hover:cursor-pointer"
+                  aria-label="Next services"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Cards Container */}
+            <div className="flex overflow-visible mx-8 py-8">
+              {isSmallScreen() ? (
+                <div className="flex sm:grid  sm:grid-cols-1 sm:md:grid-cols-2  sm:lg:grid-cols-3 gap-8 px-4">
+                  {smvisibleCards.map((card, index) => (
+                    <ServiceCard
+                      key={index}
+                      icon={card.icon}
+                      title={card.title}
+                      description={card.description}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="flex sm:grid  sm:grid-cols-1 sm:md:grid-cols-2  sm:lg:grid-cols-3 gap-8 px-4">
+                    {visibleCards.map((card, index) => (
+                      <ServiceCard
+                        key={`${currentSlide}-${index}`}
+                        icon={card.icon}
+                        title={card.title}
+                        description={card.description}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+>>>>>>> master
             </div>
 
             {/* Carousel Indicators */}
             <div className="flex justify-center mt-8 space-x-3 hover:cursor-pointer">
+<<<<<<< HEAD
               {Array.from({ length: Math.ceil(serviceCards.length / 3) }).map(
                 (_, index) => (
                   <button
@@ -244,10 +367,45 @@ const HeroSection = () => {
                     }`}
                   />
                 )
+=======
+              {isSmallScreen() ? (
+                <>
+                  {Array.from({
+                    length: serviceCards.length,
+                  }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSMCurrentSlide(index)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        smcurrentSlide === index
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-700 w-8"
+                          : "bg-gray-500 w-2 hover:bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                </>
+              ) : (
+                <>
+                  {Array.from({
+                    length: Math.ceil(serviceCards.length / 3),
+                  }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index * 3)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        currentSlide === index * 3
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-700 w-8"
+                          : "bg-gray-500 w-2 hover:bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                </>
+>>>>>>> master
               )}
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* Popular Games  */}
           <div className="mt-20 relative">
             <h2 className="text-4xl font-bold text-white mb-12 text-center">Popular Games</h2>
@@ -291,6 +449,20 @@ const HeroSection = () => {
                 ))}
               </div>
             </div>
+=======
+          {/* Dynamic Popular Sections */}
+          <div className=" mt-20">
+            {popularSections.map((section) => (
+              <DynamicPopularSection
+                key={section._id}
+                title={section.name}
+                products={section.products.map((product) => ({
+                  ...product,
+                  service: section._id,
+                }))}
+              />
+            ))}
+>>>>>>> master
           </div>
         </div>
       </div>

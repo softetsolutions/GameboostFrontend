@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
 import LogoIcon from "../../assets/svgIcons/LogoIcon.svg?react";
+<<<<<<< HEAD
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
+=======
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import LanguageSelector from "./LanguageSelector";
+import { logout, isAuthenticated, getAuthInfo } from "../../utils/auth";
+import { loginUser } from "../../api/api";
+>>>>>>> master
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,12 +20,29 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+<<<<<<< HEAD
     const token = localStorage.getItem("token");
     console.log("Token in Navbar:", token);
     setisloggedIn(!!token);
   }, []);
 
  
+=======
+    // Check authentication status on component mount
+    setisloggedIn(isAuthenticated());
+  }, []);
+  // e.g., "admin" or "user"
+  let role = "";
+
+  try {
+    const { role: userRole } = getAuthInfo();
+    role = userRole;
+    console.log(role);
+  } catch (error) {
+    console.error("User not authenticated:", error);
+    // Optionally redirect to login
+  }
+>>>>>>> master
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,10 +52,24 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+<<<<<<< HEAD
   const handleLogout = () => {
     localStorage.removeItem("token");
     setisloggedIn(false);
     navigate("/");
+=======
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setisloggedIn(false);
+      toast.success("Logged out successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+>>>>>>> master
   };
 
   const menuItems = [
@@ -85,10 +124,16 @@ const Navbar = () => {
               ))}
             </div>
             <div className="flex items-center space-x-4">
+<<<<<<< HEAD
              
               <button
                 onClick={() => setIsOpen(true)}
                 className="px-4 py-2 text-sm text-zinc-200 rounded-lg border border-cyan-400 focus:ring-2 focus:ring-cyan-500"  
+=======
+              <button
+                onClick={() => setIsOpen(true)}
+                className="px-4 py-2 text-sm text-zinc-200 rounded-lg border border-cyan-400 focus:ring-2 focus:ring-cyan-500"
+>>>>>>> master
               >
                 IN
               </button>
@@ -96,6 +141,7 @@ const Navbar = () => {
 
               {isloggedIn ? (
                 <>
+<<<<<<< HEAD
                   <button   onClick={() => navigate("/orders")}
                   className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
                     Create Offer
@@ -108,6 +154,33 @@ const Navbar = () => {
                   <button   
                   className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
                    <i className="fa-solid fa-bell"></i>
+=======
+                  {role === "user" ? (
+                      <button
+                      onClick={() => navigate("/sellerhomepage")}
+                      className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                    >
+                      Become a seller
+                    </button>
+                    
+                  ) : (
+                    <button
+                    onClick={() => navigate("/orders")}
+                    className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                  >
+                    Create Offer
+                  </button>
+                  )}
+                 
+                  <button
+                    onClick={() => navigate("/chat")}
+                    className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                  >
+                    <i className="fa-solid fa-message"></i>
+                  </button>
+                  <button className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                    <i className="fa-solid fa-bell"></i>
+>>>>>>> master
                   </button>
                   <div className="relative group inline-block">
                     <button
@@ -115,7 +188,11 @@ const Navbar = () => {
                       tabIndex={0}
                     >
                       <i className="fa-solid fa-circle-user text-3xl"></i>
+<<<<<<< HEAD
                       
+=======
+
+>>>>>>> master
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -162,6 +239,7 @@ const Navbar = () => {
               ) : (
                 <>
                   <button
+<<<<<<< HEAD
                     onClick={() => navigate("/login")}
                     className="hidden md:block relative text-gray-300 hover:text-cyan-400 transition-colors duration-200 font-medium group hover:cursor-pointer"
                   >
@@ -171,6 +249,17 @@ const Navbar = () => {
                   <Link to="/signup">
                     <button className="bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800 text-white font-semibold px-6 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
                       Register
+=======
+                    onClick={() => navigate("/sellerhomepage")}
+                    className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                  >
+                    Become a seller
+                  </button>
+
+                  <Link to="/login">
+                    <button className="bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800 text-white font-semibold px-6 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                      Sign in/Register
+>>>>>>> master
                     </button>
                   </Link>
                 </>
@@ -178,6 +267,7 @@ const Navbar = () => {
 
               {/* Mobile Menu Button */}
               <button
+<<<<<<< HEAD
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden text-white hover:text-cyan-400 transition-colors"
             >
@@ -211,6 +301,42 @@ const Navbar = () => {
                 </svg>
               )}
             </button>
+=======
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="md:hidden text-white hover:text-cyan-400 transition-colors"
+              >
+                {isMenuOpen ? (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+>>>>>>> master
           </div>
         </div>
 
@@ -232,6 +358,7 @@ const Navbar = () => {
             </div>
           </div>
         )}
+<<<<<<< HEAD
       </div>
     </div>
   </nav>
@@ -241,3 +368,14 @@ const Navbar = () => {
 export default Navbar;
 
 
+=======
+
+
+
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
+>>>>>>> master
