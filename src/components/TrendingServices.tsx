@@ -125,7 +125,7 @@ const TrendingServices = () => {
 
                         {/* Right Arrow */}
                         {currentStart < maxIdx && (
-                            <div className="absolute inset-y-0 -right-3 flex items-center z-10">
+                            <div className="absolute inset-y-0 -right-3 flex items-center z-10 ">
                                 <button
                                     onClick={() => handleNext(section._id, maxIdx)}
                                     className="group transform transition-all duration-300 hover:scale-110"
@@ -146,7 +146,7 @@ const TrendingServices = () => {
                             ref={(el: HTMLDivElement | null) => {
                                 containerRefs.current[section._id] = el;
                             }}
-                            className="overflow-hidden px-8 py-6 relative cursor-grab"
+                            className="overflow-hidden px-8 py-6 relative cursor-grab flex justify-center"
                             onMouseDown={(e) => handleMouseDown(e, section._id)}
                             onMouseUp={handleMouseUp}
                             onMouseMove={(e) => handleMouseMove(e, section._id)}

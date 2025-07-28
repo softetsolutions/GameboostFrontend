@@ -11,6 +11,7 @@ import {
   type ServiceWithCount,
 } from "../api/offers";
 import { fetchOffersByServiceId } from "../api/offers";
+import Navbar from "./headerContent/HeaderComp";
 
 interface ProductCardProps {
   offer: ApiOffer;
@@ -73,7 +74,7 @@ const ProductPageComp: React.FC = () => {
 
     fetchOffersByProductAndService(productId, serviceId)
       .then(({ services }) => {
-    
+
         setServicesWithCounts(services || []);
 
 
@@ -124,7 +125,7 @@ const ProductPageComp: React.FC = () => {
 
       //     // ✅ Debug log
       // console.log("Filtered Offers:", filteredOffers);
-    
+
       // console.log("Productids in offers",offers);
 
       // setOffers(filteredOffers);
@@ -140,46 +141,52 @@ const ProductPageComp: React.FC = () => {
 
   const ProductCard: React.FC<ProductCardProps> = ({ offer }) => {
     const navigate = useNavigate();
- 
+
 
     return (
-      <div
-        className="relative bg-gray-800/50 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden m-2 flex flex-col items-center justify-center text-center max-w-[250px] w-full aspect-square border border-gray-700/50 hover:border-cyan-500/40 ease-in-out hover:translate-y-1 cursor-pointer"
-        onClick={() => navigate(`/buy/${offer._id}`)}
-      >
-        {/* Offer Image */}
-        <img
-          src={
-            offer.images && offer.images[0]
-              ? offer.images[0]
-              : `https://placehold.co/100x100/CCCCCC/000000?text=${offer.product.title.charAt(
+
+      <>
+      <Navbar/>
+        <div
+          className="relative bg-gray-800/50 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden m-2 flex flex-col items-center justify-center text-center max-w-[250px] w-full aspect-square border border-gray-700/50 hover:border-cyan-500/40 ease-in-out hover:translate-y-1 cursor-pointer"
+          onClick={() => navigate(`/buy/${offer._id}`)}
+        >
+          {/* Offer Image */}
+          <img
+            src={
+              offer.images && offer.images[0]
+                ? offer.images[0]
+                : `https://placehold.co/100x100/CCCCCC/000000?text=${offer.product.title.charAt(
                   0
                 )}`
-          }
-          alt={offer.product.title}
-          className="absolute inset-0 w-full h-full object-cover blur-xs rounded-xl"
-          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = `https://placehold.co/100x100/CCCCCC/000000?text=${offer.product.title.charAt(
-              0
-            )}`;
-          }}
-        />
-        {/* Gradient Overlay for Text Readability */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl z-[5]"></div>
-        {/* Offers badge (show quantity available as offers) */}
-        <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full z-10">
-          {offer.quantityAvailable} available
-        </span>
-        {/* Product Name */}
-        <p className="absolute bottom-10 left-0 right-0 text-center text-gray-50 font-semibold text-base z-10 px-2">
-          {offer.product.title}
-        </p>
-        {/* Price */}
-        <p className="absolute bottom-4 left-0 right-0 text-center text-cyan-400 font-bold text-lg z-10 px-2">
-          ₹{offer.price} {offer.currency}
-        </p>
-      </div>
+            }
+            alt={offer.product.title}
+            className="absolute inset-0 w-full h-full object-cover blur-xs rounded-xl"
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = `https://placehold.co/100x100/CCCCCC/000000?text=${offer.product.title.charAt(
+                0
+              )}`;
+            }}
+          />
+          {/* Gradient Overlay for Text Readability */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl z-[5]"></div>
+          {/* Offers badge (show quantity available as offers) */}
+          <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full z-10">
+            {offer.quantityAvailable} available
+          </span>
+          {/* Product Name */}
+          <p className="absolute bottom-10 left-0 right-0 text-center text-gray-50 font-semibold text-base z-10 px-2">
+            {offer.product.title}
+          </p>
+          {/* Price */}
+          <p className="absolute bottom-4 left-0 right-0 text-center text-cyan-400 font-bold text-lg z-10 px-2">
+            ₹{offer.price} {offer.currency}
+          </p>
+        </div>
+
+      </>
+
     );
   };
 
@@ -272,7 +279,7 @@ const ProductPageComp: React.FC = () => {
                       >
                         <span>{serviceIcons[service.name]}</span>
                         <span className="font-medium">
-                           {service.name}
+                          {service.name}
                         </span>
                       </li>
 
