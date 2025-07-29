@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createService } from "../../api/services";
-import ImageIcon from "../../assets/svgIcons/ImageIcon.svg?react";
+import ImageUpload from "../ui/ImageUpload";
 import SpinnerIcon from "../../assets/svgIcons/SpinnerIcon.svg?react";
 
 function CreateService() {
@@ -11,10 +11,9 @@ function CreateService() {
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
-    icon: "",
     type: "",
   });
-  const [previewUrl, setPreviewUrl] = useState("");
+  const [icon, setIcon] = useState<File | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,43 +23,17 @@ function CreateService() {
     }));
   };
 
-  const handleIconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        // Convert the file to base64 string
-        const base64String = await convertFileToBase64(file);
-        setFormData((prev) => ({
-          ...prev,
-          icon: base64String,
-        }));
-        // Create preview URL for the selected image
-        const url = URL.createObjectURL(file);
-        setPreviewUrl(url);
+  const handleIconChange = (newImages: (File | string)[]) => {
+    // For service creation, we only need one icon
+    if (newImages.length > 0) {
+      const firstImage = newImages[0];
+      if (firstImage instanceof File) {
+        setIcon(firstImage);
         toast.success("Icon uploaded successfully!");
-      } catch (error) {
-        console.error("Error converting file to base64:", error);
-        toast.error("Failed to process the image. Please try again.");
-        setError("Failed to process the image. Please try again.");
       }
+    } else {
+      setIcon(null);
     }
-  };
-
-  const convertFileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result);
-        } else {
-          reject(new Error("Failed to convert file to base64"));
-        }
-      };
-      reader.onerror = () => {
-        reject(new Error("Failed to read file"));
-      };
-      reader.readAsDataURL(file);
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,12 +41,20 @@ function CreateService() {
     setIsSubmitting(true);
     setError("");
 
+    if (!icon) {
+      setError("Please upload a service icon.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-       await createService({
-        name: formData.name,
-        type: formData.type,
-        icon: formData.icon,
-      });
+      // Create FormData for file upload
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("type", formData.type);
+      data.append("icon", icon);
+
+      await createService(data);
       toast.success("Service created successfully!");
       navigate("/admin");
     } catch (error) {
@@ -160,45 +141,18 @@ function CreateService() {
 
           {/* Service Icon */}
           <div>
-            <label
-              htmlFor="icon"
-              className="block text-sm font-medium text-gray-300 mb-1"
-            >
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Service Icon
             </label>
-            <div className="mt-1 flex items-center space-x-4">
-              <div className="flex justify-center items-center w-16 h-16 rounded-lg border-2 border-dashed border-gray-600 overflow-hidden">
-                {previewUrl ? (
-                  <img
-                    src={previewUrl}
-                    alt="Icon preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <ImageIcon className="w-8 h-8 text-gray-400" />
-                )}
-              </div>
-              <div className="flex-1">
-                <input
-                  type="file"
-                  id="icon"
-                  name="icon"
-                  accept="image/*"
-                  onChange={handleIconChange}
-                  required
-                  className="hidden"
-                />
-                <label
-                  htmlFor="icon"
-                  className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 cursor-pointer hover:border-gray-500"
-                >
-                  Choose Icon
-                </label>
-                <p className="mt-1 text-xs text-gray-400">
-                  Recommended: 512x512px, PNG or JPG
-                </p>
-              </div>
-            </div>
+            <ImageUpload
+              images={icon ? [icon] : []}
+              onImagesChange={handleIconChange}
+              maxImages={1}
+              disabled={isSubmitting}
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Recommended: 512x512px, PNG or JPG
+            </p>
           </div>
 
           {/* Form Actions */}

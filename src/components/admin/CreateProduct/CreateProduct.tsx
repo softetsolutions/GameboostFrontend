@@ -26,13 +26,24 @@ interface Field {
 // Product types
 const PRODUCT_TYPES = ["Account", "Item", "Currency", "Service"];
 
+
+interface LocalProductFormState {
+  title: string;
+  type: string;
+  description: string;
+  service: string;
+  serviceName: string;
+  productRequiredFields: any[];
+  images: File[];
+}
+
 function CreateProduct() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [services, setServices] = useState<Service[]>([]);
 
-  const [formData, setFormData] = useState<ProductFormData>({
+  const [formData, setFormData] = useState<LocalProductFormState>({
     title: "",
     type: "",
     description: "",
@@ -102,13 +113,17 @@ function CreateProduct() {
 
     try {
       const productRequiredFields = transformFieldsForApi();
-
-      const response = (await createProduct({
-        ...formData,
-        productRequiredFields,
-        images: formData.images,
-      })) as unknown as CreateProductResponse;
-
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("type", formData.type);
+      data.append("description", formData.description);
+      data.append("service", formData.service);
+      data.append("serviceName", formData.serviceName);
+      data.append("productRequiredFields", JSON.stringify(productRequiredFields));
+      formData.images.forEach((file) => {
+        data.append("images", file);
+      });
+      const response = (await createProduct(data)) as unknown as CreateProductResponse;
       if (response.success) {
         navigate("/admin");
       } else {
@@ -185,7 +200,7 @@ function CreateProduct() {
           <ProductFields fields={fields} setFields={setFields} />
 
           <ImageUpload
-            images={formData.images || []}
+            images={formData.images}
             onImagesChange={(imgs) => setFormData((prev) => ({ ...prev, images: imgs }))}
             maxImages={5}
           />

@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { processImageFiles, removeImageFromArray } from "../../utils/imageUtils";
-import type { ImageUploadResult } from "../../utils/imageUtils";
 
 interface ImageUploadProps {
-  images: string[];
-  onImagesChange: (images: string[]) => void;
+  images: (File | string)[];
+  onImagesChange: (images: (File | string)[]) => void;
   maxImages?: number;
   disabled?: boolean;
   className?: string;
@@ -24,7 +22,6 @@ export default function ImageUpload({
     if (!files || files.length === 0) return;
     if (disabled) return;
 
-    // Check if adding these files would exceed maxImages
     if (images.length + files.length > maxImages) {
       setError(`Maximum ${maxImages} images allowed`);
       return;
@@ -34,13 +31,23 @@ export default function ImageUpload({
     setError("");
 
     try {
-      const result: ImageUploadResult = await processImageFiles(files);
-      
-      if (result.success && result.images) {
-        onImagesChange([...images, ...result.images]);
-      } else {
-        setError(result.error || 'Failed to upload images');
+      // Validate and add files
+      const newFiles: File[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) {
+          setError('Please upload only image files');
+          setIsUploading(false);
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          setError('Image size should be less than 5MB');
+          setIsUploading(false);
+          return;
+        }
+        newFiles.push(file);
       }
+      onImagesChange([...images, ...newFiles]);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to upload images');
     } finally {
@@ -56,7 +63,6 @@ export default function ImageUpload({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       handleImageUpload(files);
@@ -64,8 +70,16 @@ export default function ImageUpload({
   };
 
   const removeImage = (index: number) => {
-    const newImages = removeImageFromArray(images, index);
+    const newImages = images.filter((_, i) => i !== index);
     onImagesChange(newImages);
+  };
+
+  const getImageSrc = (image: File | string): string => {
+    if (typeof image === 'string') {
+      return image; // URL string
+    } else {
+      return URL.createObjectURL(image); // File object
+    }
   };
 
   return (
@@ -159,7 +173,7 @@ export default function ImageUpload({
           {images.map((image, index) => (
             <div key={index} className="relative group">
               <img
-                src={image}
+                src={getImageSrc(image)}
                 alt={`Uploaded ${index + 1}`}
                 className="w-full aspect-video object-contain rounded-lg border border-gray-600"
               />

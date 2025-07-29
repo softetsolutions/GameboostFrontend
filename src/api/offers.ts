@@ -12,27 +12,25 @@ export interface OfferFormData {
   images: string[];
 }
 
-export interface ApiOffer {
+export type ApiOffer = {
   _id: string;
-  product: {
-    _id: string;
-    title: string;
-    type: string;
-    service: { _id: string; name: string } | string;
-  };
-  seller: {
-    _id: string;
-  };
-  offerDetails: Array<{ fieldName: string; value: any }>;
   price: number;
   currency: string;
   quantityAvailable: number;
-  deliveryTime: string;
-  instantDelivery: boolean;
-  status: string;
-  images: string[];
-  createdAt: string;
-}
+  images?: string[];
+  product: {
+    _id: string;
+    title: string;
+    service: string;
+  };
+};
+
+export type ServiceWithCount = {
+  _id: string;
+  name: string;
+  offerCount: number;
+  icon?: string;
+};
 
 export const createOffer = async (offerData: OfferFormData): Promise<ApiOffer> => {
   const { userId: seller } = getAuthInfo();
@@ -198,14 +196,20 @@ export const fetchOffersBySellerId = async (): Promise<ApiOffer[]> => {
   throw new Error("Invalid response format from server");
 }; 
 
-export const fetchOffersByProductAndService = async (productId: string, serviceId: string): Promise<ApiOffer[]> => {
-  const response = await fetch(`${API_BASE_URL}/offers/filter?productId=${productId}&serviceId=${serviceId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+export const fetchOffersByProductAndService = async (
+  productId: string,
+  serviceId: string
+): Promise<{ offers: ApiOffer[]; services: ServiceWithCount[] }> => {
+  const response = await fetch(
+    `${API_BASE_URL}/offers/filter?productId=${productId}&serviceId=${serviceId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response
@@ -215,8 +219,47 @@ export const fetchOffersByProductAndService = async (productId: string, serviceI
   }
 
   const result = await response.json();
-  if (result.success && Array.isArray(result.data)) {
-    return result.data;
+
+
+  if (result.success && Array.isArray(result.offers)) {
+    return {
+      offers: result.offers,
+      services: result.services,
+ 
+    };
   }
+
   throw new Error("Invalid response format from server");
-}; 
+};
+export const fetchOffersByServiceId = async (
+  serviceId: string,
+  page: number = 1,
+  limit: number = 10
+) => {
+
+  const { token } = getAuthInfo();
+  try {
+
+    
+    const response = await fetch(
+      `${API_BASE_URL}/offers/service/${serviceId}?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch offers by serviceId");
+    }
+
+    return await response.json(); // { success, data: offers, pagination }
+  } catch (error) {
+    console.error("API error (fetchOffersByServiceId):", error);
+    throw error;
+  }
+};

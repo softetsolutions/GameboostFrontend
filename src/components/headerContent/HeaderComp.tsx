@@ -4,6 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import LanguageSelector from "./LanguageSelector";
 import { logout, isAuthenticated } from "../../utils/auth";
+import { useLocation } from 'react-router-dom';
+import SearchBar from "../SearchBar";
+
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +14,13 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isloggedIn, setisloggedIn] = useState(false);
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const showMenu = location.pathname === "/";
+  const showSearchbar =
+    location.pathname.startsWith("/product") ||
+    location.pathname.startsWith("/services");
 
   useEffect(() => {
     // Check authentication status on component mount
@@ -48,25 +58,25 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-gray-900/90 border-b border-cyan-500/20 shadow-lg py-2"
-          : "bg-transparent backdrop-blur-xl py-4"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+        ? "bg-gray-900/90 border-b border-cyan-500/20 shadow-lg py-2"
+        : "bg-transparent backdrop-blur-xl py-4"
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4">
         <div
-          className={`transition-all duration-300 ${
-            isScrolled
-              ? "bg-black/40 backdrop-blur-lg border border-cyan-500/30 rounded-2xl px-6 py-3"
-              : "bg-black/20 backdrop-blur-lg border border-cyan-500/30 rounded-2xl px-6 py-4"
-          } shadow-2xl shadow-cyan-500/10`}
+          className={`transition-all duration-300 ${isScrolled
+            ? "bg-black/40 backdrop-blur-lg border border-cyan-500/30 rounded-2xl px-6 py-3"
+            : "bg-black/20 backdrop-blur-lg border border-cyan-500/30 rounded-2xl px-6 py-4"
+            } shadow-2xl shadow-cyan-500/10`}
         >
           <div className="flex items-center justify-between">
             {/* Logo  */}
+            <Link to="/">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-r from-cyan-500 to-blue-700 p-2 rounded-xl">
                 <LogoIcon className="w-8 h-8 text-white" />
+                {/* <LogoIcon className="w-8 h-8 text-white" /> */}
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
@@ -75,9 +85,10 @@ const Navbar = () => {
                 <p className="text-xs text-gray-400">Pro Gaming Services</p>
               </div>
             </div>
+            </Link>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-8">
+            {/* <div className="hidden md:flex items-center space-x-8">
               {menuItems.map((item) => (
                 <a
                   key={item.href}
@@ -88,12 +99,30 @@ const Navbar = () => {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-600 group-hover:w-full transition-all duration-300 ease-out shadow-lg shadow-cyan-400/50"></span>
                 </a>
               ))}
+            </div> */}
+            {/* Desktop Menu OR SearchBar */}
+            <div className="hidden md:flex items-center space-x-8 flex-1 justify-center">
+              {showMenu ? (
+                menuItems.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="relative text-gray-300 hover:text-cyan-400 transition-colors duration-200 font-medium group"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-600 group-hover:w-full transition-all duration-300 ease-out shadow-lg shadow-cyan-400/50"></span>
+                  </a>
+                ))
+              ) : showSearchbar ? (
+                <SearchBar />
+              ) : null}
             </div>
+
             <div className="flex items-center space-x-4">
-             
+
               <button
                 onClick={() => setIsOpen(true)}
-                className="px-4 py-2 text-sm text-zinc-200 rounded-lg border border-cyan-400 focus:ring-2 focus:ring-cyan-500"  
+                className="px-4 py-2 text-sm text-zinc-200 rounded-lg border border-cyan-400 focus:ring-2 focus:ring-cyan-500"
               >
                 IN
               </button>
@@ -101,18 +130,18 @@ const Navbar = () => {
 
               {isloggedIn ? (
                 <>
-                  <button   onClick={() => navigate("/orders")}
-                  className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                  <button onClick={() => navigate("/orders")}
+                    className="px-4 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
                     Create Offer
                   </button>
-                  <button  
-                    onClick={() => navigate("/chat")} 
-                  className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                  <button
+                    onClick={() => navigate("/chat")}
+                    className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
                     <i className="fa-solid fa-message"></i>
                   </button>
-                  <button   
-                  className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
-                   <i className="fa-solid fa-bell"></i>
+                  <button
+                    className="px-3 py-2 text-sm text-white rounded-xl font-medium border border-cyan-200  hover:bg-gradient-to-r from-cyan-500 to-blue-700 shadow-lg hover:shadow-cyan-500/25 transition-all duration-300">
+                    <i className="fa-solid fa-bell"></i>
                   </button>
                   <div className="relative group inline-block">
                     <button
@@ -120,7 +149,7 @@ const Navbar = () => {
                       tabIndex={0}
                     >
                       <i className="fa-solid fa-circle-user text-3xl"></i>
-                      
+
                       <svg
                         className="w-4 h-4"
                         fill="none"

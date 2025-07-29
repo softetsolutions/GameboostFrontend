@@ -1,21 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import BoostingIcon from "../../assets/svgIcons/boostingArrow.svg?react";
 import UserIcon from "../../assets/svgIcons/userIcon.svg?react";
 import CurrencyIcon from "../../assets/svgIcons/currencyIcon.svg?react";
 import CoachIcon from "../../assets/svgIcons/coachIcon.svg?react";
 import TournamentIcon from "../../assets/svgIcons/tournamentIcon.svg?react";
 import ServiceCard from "../ServiceCard";
-import SearchIcon from "../../assets/svgIcons/SearchIcon.svg?react";
 import ArrowLeft from "../../assets/svgIcons/ArrowLeft.svg?react";
 import ArrowRight from "../../assets/svgIcons/ArrowRight.svg?react";
-import { fetchHomePageData } from "../../api/products";
-import type { HomePageService } from "../../api/products";
-import DynamicPopularSection from "../DynamicPopularSection";
+import SearchBar from "../SearchBar";
+import BrowsingHistory from "../BrowsingHistory";
+import TrendingServices from "../TrendingServices";
 
 const HeroSection = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [popularSections, setPopularSections] = useState<HomePageService[]>([]);
 
   // Services
   const serviceCards = [
@@ -50,16 +47,6 @@ const HeroSection = () => {
     },
   ];
 
-  useEffect(() => {
-    fetchHomePageData()
-      .then((services: HomePageService[]) => {
-        setPopularSections(services);
-      })
-      .catch(() => setPopularSections([]));
-  }, []);
-
-  const handleSearch = () => {
-  };
   const nextSlide = () => {
     setCurrentSlide((prev) => {
       const maxSlides = Math.ceil(serviceCards.length / 3) - 1;
@@ -107,28 +94,7 @@ const HeroSection = () => {
           </h1>
 
           {/* Search */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <div className="flex flex-col sm:flex-row gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-2">
-              <div className="flex-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <SearchIcon className="w-5 h-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search games, services, accounts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-white placeholder-gray-300 pl-12 pr-6 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-              <button
-                onClick={handleSearch}
-                className="bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-600 hover:to-blue-800 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Search
-              </button>
-            </div>
-          </div>
+          <SearchBar />
 
           {/* Service Cards */}
           <div className="relative max-w-7xl mx-auto mb-24 py-4">
@@ -169,27 +135,18 @@ const HeroSection = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index * 3)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      currentSlide === index * 3
+                    className={`h-2 rounded-full transition-all duration-300 ${currentSlide === index * 3
                         ? "bg-gradient-to-r from-cyan-500 to-blue-700 w-8"
                         : "bg-gray-500 w-2 hover:bg-gray-400"
-                    }`}
+                      }`}
                   />
                 )
               )}
             </div>
           </div>
 
-          {/* Dynamic Popular Sections */}
-          <div className="mt-20">
-            {popularSections.map(section => (
-              <DynamicPopularSection
-                key={section._id}
-                title={section.name}
-                products={section.products.map(product => ({ ...product, service: section._id }))}
-              />
-            ))}
-          </div>
+          <BrowsingHistory />
+          <TrendingServices/>
         </div>
       </div>
     </section>

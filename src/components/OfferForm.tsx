@@ -22,14 +22,14 @@ interface DynamicField {
 }
 
 interface OfferFormData {
-  brand: string;
+    brand: string;
   dynamicFields: Record<string, string>;
   price: string;
   currency: string;
   quantityAvailable: string;
   deliveryTime: string;
   instantDelivery: boolean;
-  images: string[];
+  images: (File | string)[];
 }
 
 interface OfferFormProps {
@@ -90,7 +90,7 @@ function OfferForm({ mode, offerData, onSuccess, onCancel }: OfferFormProps) {
         try {
           // 1. Load product details, which includes service and field definitions
           const productDetails = await fetchProductById(offerData.product._id);
-          const serviceId = productDetails.service;
+          const serviceId = productDetails.service._id;
 
           if (!serviceId) {
             setError("The product for this offer is not associated with a service.");
@@ -215,7 +215,7 @@ function OfferForm({ mode, offerData, onSuccess, onCancel }: OfferFormProps) {
     }
   };
 
-  const handleImagesChange = (newImages: string[]) => {
+  const handleImagesChange = (newImages: (File | string)[]) => {
     setFormData(prev => ({
       ...prev,
       images: newImages
@@ -236,10 +236,32 @@ function OfferForm({ mode, offerData, onSuccess, onCancel }: OfferFormProps) {
         }
       }
 
+      // Build FormData for file upload
+      const data = new FormData();
+      data.append("product", formData.brand);
+      data.append("price", formData.price);
+      data.append("currency", formData.currency);
+      data.append("quantityAvailable", formData.quantityAvailable);
+      data.append("deliveryTime", formData.deliveryTime);
+      data.append("instantDelivery", String(formData.instantDelivery));
+      // Offer details as JSON string
+      data.append(
+        "offerDetails",
+        JSON.stringify(
+          Object.entries(formData.dynamicFields).map(([fieldName, value]) => ({ fieldName, value }))
+        )
+      );
+      // Only append new files (not existing URLs)
+      formData.images.forEach((image) => {
+        if (image instanceof File) {
+          data.append("images", image);
+        }
+      });
+
       if (mode === 'create') {
-        await createOffer(formData);
+        await createOffer(data);
       } else if (mode === 'edit' && offerData) {
-        await updateOffer(offerData._id, formData);
+        await updateOffer(offerData._id, data);
       }
 
       toast.success(mode === 'create' ? 'Offer created successfully!' : 'Offer updated successfully!');

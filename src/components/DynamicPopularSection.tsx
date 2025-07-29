@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import PopularGameCard from "./PopularGameCard";
-import { fetchOffersByProductAndService } from "../api/offers";
 import toast from "react-hot-toast";
 
 type Product = {
@@ -37,10 +36,8 @@ const DynamicPopularSection = ({ title, products }: DynamicPopularSectionProps) 
       if (!product.service) {
         throw new Error("Service ID not found for product");
       }
-      
-      // Fetch offers for the product
-      await fetchOffersByProductAndService(product._id, product.service);
       navigate(`/product?productId=${product._id}&serviceId=${product.service}`, { state: { serviceName: title } });
+      
     } catch (error) {
       console.error("Error navigating to product page:", error);
       toast.error("Failed to load product offers");

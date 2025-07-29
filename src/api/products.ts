@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "./config";
-import { getAuthInfo } from "../utils/auth";
+import { getAuthInfo, handleUnauthorized } from "../utils/auth";
 
 export interface ProductFormData {
   title: string;
@@ -14,7 +14,7 @@ export interface ProductFormData {
     isrequired: boolean;
   }>;
   additionalFields?: any[];
-  images?: string[];
+  images?: (File | string)[];
 }
 
 export interface Product {
@@ -22,18 +22,19 @@ export interface Product {
   title: string;
   type: string;
   description: string;
-  service: string;
-  serviceName: string;
+  service: {
+    _id: string;
+    name: string;
+  };
   productRequiredFields: Array<{
     fieldName: string;
     fieldType: string;
     options: string[];
     isrequired: boolean;
   }>;
-  additionalFields?: any[];
   images?: string[];
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface HomePageProduct {
@@ -51,28 +52,21 @@ export interface HomePageService {
 }
 
 export const createProduct = async (
-  productData: ProductFormData
+  productData: FormData
 ): Promise<Product> => {
   const { token } = getAuthInfo();
 
   const response = await fetch(`${API_BASE_URL}/products`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
     credentials: "include",
-    body: JSON.stringify({
-      ...productData,
-      ...(!productData.service &&
-        productData.serviceName && {
-          serviceName: productData.serviceName,
-          service: undefined,
-        }),
-    }),
+    body: productData,
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     throw new Error("Failed to create product");
   }
@@ -91,6 +85,7 @@ export const fetchProductsByService = async (
     },
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     throw new Error("Failed to fetch products for the service");
   }
@@ -103,30 +98,23 @@ export const fetchProductsByService = async (
 };
 
 export const fetchProductById = async (productId: string): Promise<Product> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
   const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
     credentials: "include",
     headers: {
       Accept: "application/json",
     },
   });
-
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error(
-      "Failed to fetch product details:",
-      response.status,
-      errorText
-    );
-    throw new Error(`Failed to fetch product details: ${response.status}`);
+    throw new Error("Failed to load product details");
   }
-
-  try {
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Failed to parse product details ", error);
-    throw new Error("Failed to parse product details");
-  }
+  return response.json();
 };
 
 export const fetchHomePageData = async (): Promise<HomePageService[]> => {
@@ -136,6 +124,7 @@ export const fetchHomePageData = async (): Promise<HomePageService[]> => {
     },
   });
 
+  if (response.status === 401) await handleUnauthorized();
   if (!response.ok) {
     throw new Error("Failed to fetch homepage data");
   }
@@ -145,4 +134,67 @@ export const fetchHomePageData = async (): Promise<HomePageService[]> => {
     return res.data;
   }
   throw new Error("Invalid homepage data format");
+};
+
+export const fetchAllProducts = async (): Promise<Product[]> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/products`, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    throw new Error("Failed to fetch products");
+  }
+  const data = await response.json();
+  return Array.isArray(data.data) ? data.data : [];
+};
+
+export const deleteProduct = async (productId: string): Promise<void> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    throw new Error("Failed to delete product");
+  }
+};
+
+export const updateProduct = async (productId: string, data: FormData): Promise<void> => {
+  try {
+    getAuthInfo();
+  } catch {
+    await handleUnauthorized();
+    throw new Error("No authentication token found");
+  }
+  const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+    body: data,
+  });
+  if (response.status === 401) await handleUnauthorized();
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: "Failed to update product" }));
+    throw new Error(errorData.message || "Failed to update product");
+  }
 };
